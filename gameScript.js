@@ -150,13 +150,17 @@ function Player(GridObj) {
             }
         }
     }
+    this.kill = function () {
+        window.location.href="gameOver.html";
+    }
+
     this.moveRight = function (squareObjs) {
         if (squareObjs[this.divIndex+1].color === "#26313b") {
             squareObjs[this.divIndex].changeColor("#26313b");
             this.divIndex+=1;
             squareObjs[this.divIndex].changeColor(this.color);
         }
-        else if (squareObjs[this.divIndex+1].color === PlayerObj.color) {
+        else if (squareObjs[this.divIndex+1].color === "#00b4d8") {
             this.kill();
         }
     }
@@ -166,7 +170,7 @@ function Player(GridObj) {
             this.divIndex-=1;
             squareObjs[this.divIndex].changeColor(this.color);
         }
-        else if (squareObjs[this.divIndex-1].color === PlayerObj.color) {
+        else if (squareObjs[this.divIndex-1].color === "#00b4d8") {
             this.kill();
         }
     }
@@ -176,7 +180,7 @@ function Player(GridObj) {
             this.divIndex-=GridObj.c;
             squareObjs[this.divIndex].changeColor(this.color);
         }
-        else if (squareObjs[this.divIndex-GridObj.c].color === PlayerObj.color) {
+        else if (squareObjs[this.divIndex-GridObj.c].color === "#00b4d8") {
             this.kill();
         }
     }
@@ -186,12 +190,9 @@ function Player(GridObj) {
             this.divIndex+=GridObj.c;
             squareObjs[this.divIndex].changeColor(this.color);
         }
-        else if (squareObjs[this.divIndex+GridObj.c].color === PlayerObj.color) {
+        else if (squareObjs[this.divIndex+GridObj.c].color === "#00b4d8") {
             this.kill();
         }
-    }
-    this.kill = function () {
-        window.location.href="gameOver.html";
     }
 }
 
