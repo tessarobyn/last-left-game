@@ -156,12 +156,18 @@ function Player(GridObj) {
             this.divIndex+=1;
             squareObjs[this.divIndex].changeColor(this.color);
         }
+        else if (squareObjs[this.divIndex+1].color === PlayerObj.color) {
+            this.kill();
+        }
     }
     this.moveLeft = function (squareObjs) {
         if (squareObjs[this.divIndex-1].color === "#26313b") {
             squareObjs[this.divIndex].changeColor("#26313b");
             this.divIndex-=1;
             squareObjs[this.divIndex].changeColor(this.color);
+        }
+        else if (squareObjs[this.divIndex-1].color === PlayerObj.color) {
+            this.kill();
         }
     }
     this.moveUp = function (squareObjs) {
@@ -170,6 +176,9 @@ function Player(GridObj) {
             this.divIndex-=GridObj.c;
             squareObjs[this.divIndex].changeColor(this.color);
         }
+        else if (squareObjs[this.divIndex-GridObj.c].color === PlayerObj.color) {
+            this.kill();
+        }
     }
     this.moveDown = function (squareObjs) {
         if (squareObjs[this.divIndex+GridObj.c].color === "#26313b") {
@@ -177,6 +186,12 @@ function Player(GridObj) {
             this.divIndex+=GridObj.c;
             squareObjs[this.divIndex].changeColor(this.color);
         }
+        else if (squareObjs[this.divIndex+GridObj.c].color === PlayerObj.color) {
+            this.kill();
+        }
+    }
+    this.kill = function () {
+        window.location.href="gameOver.html";
     }
 }
 
@@ -205,12 +220,18 @@ function Enemy(GridObj) {
             this.divIndex+=1;
             squareObjs[this.divIndex].changeColor(this.color);
         }
+        else if (squareObjs[this.divIndex+1].color === PlayerObj.color) {
+            PlayerObj.kill();
+        }
     }
     this.moveLeft = function (squareObjs) {
         if (squareObjs[this.divIndex-1].color === "#26313b") {
             squareObjs[this.divIndex].changeColor("#26313b");
             this.divIndex-=1;
             squareObjs[this.divIndex].changeColor(this.color);
+        }
+        else if (squareObjs[this.divIndex-1].color === PlayerObj.color) {
+            PlayerObj.kill();
         }
     }
     this.moveUp = function (squareObjs) {
@@ -219,12 +240,18 @@ function Enemy(GridObj) {
             this.divIndex-=GridObj.c;
             squareObjs[this.divIndex].changeColor(this.color);
         }
+        else if (squareObjs[this.divIndex-GridObj.c].color === PlayerObj.color) {
+            PlayerObj.kill();
+        }
     }
     this.moveDown = function (squareObjs) {
         if (squareObjs[this.divIndex+GridObj.c].color === "#26313b") {
             squareObjs[this.divIndex].changeColor("#26313b");
             this.divIndex+=GridObj.c;
             squareObjs[this.divIndex].changeColor(this.color);
+        }
+        else if (squareObjs[this.divIndex+GridObj.c].color === PlayerObj.color) {
+            PlayerObj.kill();
         }
     }
 
