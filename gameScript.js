@@ -145,7 +145,7 @@ function Player(GridObj) {
     this.findSquare = function (squareObjs) {
         for (let i=0;i < squareObjs.length; i++) {
             if (squareObjs[i].y === this.y && squareObjs[i].x === this.x) {
-                squareObjs[i].changeColor("#ff3366");
+                squareObjs[i].changeColor(this.color);
                 this.divIndex=i;
             }
         }
@@ -180,6 +180,72 @@ function Player(GridObj) {
     }
 }
 
+function Enemy(GridObj) {
+    if (!(this instanceof Enemy)) {
+        return new Enemy(GridObj);
+    }
+    this.color="#00b4d8";
+    this.divIndex;
+    this.x=3;
+    this.y=3;
+    this.findSquare = function (squareObjs) {
+        this.x=randomInt(1, GridObj.c-2);
+        this.y=randomInt(1, GridObj.r-2);
+        for (let i=0;i < squareObjs.length; i++) {
+            if (squareObjs[i].y === this.y && squareObjs[i].x === this.x) {
+                squareObjs[i].changeColor(this.color);
+                this.divIndex=i;
+            }
+        }
+    }
+
+    this.moveRight = function (squareObjs) {
+        if (squareObjs[this.divIndex+1].color === "#26313b") {
+            squareObjs[this.divIndex].changeColor("#26313b");
+            this.divIndex+=1;
+            squareObjs[this.divIndex].changeColor(this.color);
+        }
+    }
+    this.moveLeft = function (squareObjs) {
+        if (squareObjs[this.divIndex-1].color === "#26313b") {
+            squareObjs[this.divIndex].changeColor("#26313b");
+            this.divIndex-=1;
+            squareObjs[this.divIndex].changeColor(this.color);
+        }
+    }
+    this.moveUp = function (squareObjs) {
+        if (squareObjs[this.divIndex-GridObj.c].color === "#26313b") {
+            squareObjs[this.divIndex].changeColor("#26313b");
+            this.divIndex-=GridObj.c;
+            squareObjs[this.divIndex].changeColor(this.color);
+        }
+    }
+    this.moveDown = function (squareObjs) {
+        if (squareObjs[this.divIndex+GridObj.c].color === "#26313b") {
+            squareObjs[this.divIndex].changeColor("#26313b");
+            this.divIndex+=GridObj.c;
+            squareObjs[this.divIndex].changeColor(this.color);
+        }
+    }
+
+    this.move=function(squareObjs) {
+            let move = randomInt(1,4);
+            if (move === 1) {
+                this.moveRight(squareObjs);
+            }
+            else if (move === 2) {
+                this.moveLeft(squareObjs);
+            }
+            else if (move === 3) {
+                this.moveUp(squareObjs);
+            }
+            else if (move === 4) {
+                this.moveDown(squareObjs);
+            }
+        
+    }
+}
+
 function checkKey(e) {
     if (e.code == "KeyW") {
         PlayerObj.moveUp(squareObjs);
@@ -195,13 +261,38 @@ function checkKey(e) {
     }
 }
 
+function addEnemies(GridObj,squareObjs,enemiesObjs) {
+    const numOfSquares = GridObj.r*GridObj.c;
+    const numOfEnemies = Math.round(numOfSquares/75);
+    for (let i=0;i < numOfEnemies; i++) {
+        var EnemyObj=new Enemy(GridObj);
+        EnemyObj.findSquare(squareObjs);
+        enemiesObjs.push(EnemyObj);
+    }
+}
+
+function moveEnemies(enemiesObjs,squareObjs) {
+    for (let i = 0; i < enemiesObjs.length; i++) {
+        enemiesObjs[i].move(squareObjs);
+    }
+}
+
 let squareObjs=[];
+let enemiesObjs=[];
 var GridObj= new Grid();
 GridObj.setup();
 GridObj.create(squareObjs);
-GridObj.addWalls(squareObjs);
+
 var PlayerObj= new Player(GridObj);
 PlayerObj.findSquare(squareObjs);
-PlayerObj.moveUp(squareObjs);
+
+addEnemies(GridObj,squareObjs,enemiesObjs);
+
+GridObj.addWalls(squareObjs);
+
+var t=setInterval(function () {
+    moveEnemies(enemiesObjs,squareObjs)
+    },
+    300);
 
 window.addEventListener("keydown",checkKey);
