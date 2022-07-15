@@ -321,12 +321,14 @@ function Player(GridObj) {
         const coinCount=document.getElementById("coinCount");
         this.coinsCollected+=1
         coinCount.innerText="Coins collected: "+String(this.coinsCollected)+"/"+String(this.totalCoins);
+        checkFinish(this);
     }
 
     this.showKillEnemy = function() {
         const killCount=document.getElementById("killCount");
         this.enemiesKilled+=1
         killCount.innerText="Enemies killed: "+String(this.enemiesKilled)+"/"+String(this.totalEnemies);
+        checkFinish(this);
     } 
 
     this.shoot = function() {
@@ -472,7 +474,9 @@ function moveBullets(PlayerObj,squareObjs,GridObj) {
 }
 
 function checkFinish(PlayerObj) {
-    if (PlayerObj.)
+    if (PlayerObj.coinsCollected === PlayerObj.totalCoins && PlayerObj.enemiesKilled === PlayerObj.totalEnemies) {
+        window.location.href="win.html";
+    }
 }
 
 let squareObjs=[];
