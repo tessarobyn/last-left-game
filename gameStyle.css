@@ -1,18 +1,46 @@
 html, body {
     margin:0;
-    font-family:"roboto",sans-serif;
-    background-color: #142029;
-    color:#ffffff;
     width:100%;
     height:100%;
 }
 
+body {
+    font-family:"roboto",sans-serif;
+    background-color: #142029;
+    color:#ffffff;
+    z-index:-2;
+}
+
+.data {
+    background-color: rgba(0,0,0,.3);
+    overflow: auto;
+}
+
+h3 {
+    display:inline;
+    font-size: 2vw;
+    font-weight:100;
+    margin:1.5vw;
+}
+
+.coinCount {
+    float:left;
+}
+
+.killCount {
+    float:right;
+}
+
 .grid {
+    position: absolute;
+    top:0;
+    left:0;
     display:grid;
     row-gap: 2px;
     column-gap: 2px;
     width: 100%;
     height:100%;
+    z-index:-1;
 }
 
 .grid > div {
