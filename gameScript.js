@@ -161,6 +161,71 @@ function Square(div,x,y) {
     }
 }
 
+function Bullet(direction,divIndex,c,r) {
+    if (!(this instanceof Bullet)) {
+        return new Bullet();
+    }
+    this.x=divIndex%c;
+    this.y=Math.floor(divIndex/c);
+    this.direction=direction;
+    this.length=1;
+    this.width=0.5;
+    this.bullet;
+    this.add = function (c,r) {
+        const bullet = document.createElement("div");
+        bullet.classList.add("bullet");
+        if (this.direction === "up" || this.direction === "down") {
+            bullet.style.width=this.width+"vh";
+            bullet.style.height=this.length+"vh";
+        }
+        else {
+            bullet.style.width=this.length+"vh";
+            bullet.style.height=this.width+"vh";
+        }
+        const body=document.getElementsByTagName("body")[0];
+        this.y=(body.offsetHeight/r)*this.y + (body.offsetHeight/r)/2;
+        this.x=(body.offsetWidth/c)*this.x + (body.offsetWidth/c)/2;
+        bullet.style.top=this.y+"px";
+        bullet.style.left=this.x+"px";
+        const container = document.getElementById("bulletContainer");
+        this.bullet=bullet;
+        container.appendChild(bullet);
+    }
+
+    this.checkKill = function (squareObjs,c,r,PlayerObj) {
+        const body=document.getElementsByTagName("body")[0];
+        const xSquare=Math.floor(this.x/(body.offsetWidth/c));
+        const ySquare=Math.floor(this.y/(body.offsetHeight/r));
+        let i=ySquare*c+xSquare;
+        if (squareObjs[i] !== undefined) {
+            if (squareObjs[i].color === "#00b4d8") {
+                squareObjs[i].changeColor("#26313b");
+                PlayerObj.killEnemy(xSquare,ySquare);
+            }
+        else {
+            PlayerObj.BulletObjs.splice(i,1);
+        }
+        }
+    }
+    
+    this.move = function () {
+        if (this.direction === "left") {
+            this.x-=3;
+        }
+        if (this.direction === "right") {
+            this.x+=3;
+        }
+        if (this.direction === "up") {
+            this.y-=3;
+        }
+        if (this.direction === "down") {
+            this.y+=3;
+        }
+        this.bullet.style.top=this.y+"px";
+        this.bullet.style.left=this.x+"px";
+    }
+}
+
 function Player(GridObj) {
     if (!(this instanceof Player)) {
         return new Player(GridObj);
@@ -171,8 +236,12 @@ function Player(GridObj) {
     this.enemyColor="#00b4d8";
     this.coinColor="#ffc857";
     this.coinsCollected=-1;
+    this.enemiesKilled=-1;
     this.totalCoins;
+    this.totalEnemies;
     this.divIndex;
+    this.direction="up";
+    this.BulletObjs=[];
     this.findSquare = function (squareObjs) {
         for (let i=0;i < squareObjs.length; i++) {
             if (squareObjs[i].y === this.y && squareObjs[i].x === this.x) {
@@ -193,6 +262,7 @@ function Player(GridObj) {
                 this.collectCoin();
             }
             squareObjs[this.divIndex].changeColor(this.color);
+            this.direction="right";
         }
         else if (squareObjs[this.divIndex+1].color === this.enemyColor) {
             this.kill();
@@ -206,6 +276,7 @@ function Player(GridObj) {
                 this.collectCoin(coinObjs.length);
             }
             squareObjs[this.divIndex].changeColor(this.color);
+            this.direction="left";
         }
         else if (squareObjs[this.divIndex-1].color === this.enemyColor) {
             this.kill();
@@ -219,6 +290,7 @@ function Player(GridObj) {
                 this.collectCoin(coinObjs.length);
             }
             squareObjs[this.divIndex].changeColor(this.color);
+            this.direction="up";
         }
         else if (squareObjs[this.divIndex-GridObj.c].color === this.enemyColor) {
             this.kill();
@@ -232,6 +304,7 @@ function Player(GridObj) {
                 this.collectCoin(coinObjs.length);
             }
             squareObjs[this.divIndex].changeColor(this.color);
+            this.direction="down";
         }
         else if (squareObjs[this.divIndex+GridObj.c].color === this.enemyColor) {
             this.kill();
@@ -242,6 +315,23 @@ function Player(GridObj) {
         const coinCount=document.getElementById("coinCount");
         this.coinsCollected+=1
         coinCount.innerText="Coins collected: "+String(this.coinsCollected)+"/"+String(this.totalCoins);
+    }
+
+    this.killEnemy = function(x,y) {
+        for (let i = 0; i < enemiesObjs.length; i++) {
+            if (enemiesObjs[i].y === y && enemiesObjs[i].y === y) {
+                enemiesObjs.splice(i,1);
+            }
+        }
+        const coinCount=document.getElementById("killCount");
+        this.enemiesKilled+=1
+        coinCount.innerText="Enemies killed: "+String(this.enemiesKilled)+"/"+String(this.totalEnemies);
+    } 
+
+    this.shoot = function() {
+        var BulletObj= new Bullet(this.direction,this.divIndex,GridObj.c,GridObj.r);
+        BulletObj.add(GridObj.c,GridObj.r);
+        this.BulletObjs.push(BulletObj);
     }
 }
 
@@ -314,15 +404,19 @@ function Enemy(GridObj) {
 }
 
 Enemy.prototype.findSquare = function (squareObjs) {
+    added=false;
+    while (!added) {
         this.x=randomInt(1, GridObj.c-2);
         this.y=randomInt(1, GridObj.r-2);
-        for (let i=0;i < squareObjs.length; i++) {
-            if (squareObjs[i].y === this.y && squareObjs[i].x === this.x) {
-                squareObjs[i].changeColor(this.color);
-                this.divIndex=i;
-            }
+        let i=this.y*GridObj.c+this.x;
+        if (squareObjs[i].color === "#26313b") {
+            squareObjs[i].changeColor(this.color);
+            this.divIndex=i;
+            added=true;
         }
+    }
 }
+
 
 function Coin(GridObj) {
     if (!(this instanceof Coin)) {
@@ -343,6 +437,9 @@ function checkKey(e) {
     }
     else if (e.code == "KeyD") {
         PlayerObj.moveRight(squareObjs);
+    }
+    else if (e.code == "Space") {
+        PlayerObj.shoot();
     }
 }
 
@@ -366,6 +463,13 @@ function moveEnemies(enemiesObjs,squareObjs) {
     }
 }
 
+function moveBullets(PlayerObj,squareObjs,GridObj) {
+    for (let i = 0; i < PlayerObj.BulletObjs.length; i++) {
+        PlayerObj.BulletObjs[i].move();
+        PlayerObj.BulletObjs[i].checkKill(squareObjs,GridObj.c,GridObj.r,PlayerObj);
+    }
+}
+
 let squareObjs=[];
 let enemiesObjs=[];
 let coinObjs=[];
@@ -380,13 +484,20 @@ enemiesObjs=addInteractiveSquares(GridObj,squareObjs,enemiesObjs,Enemy);
 coinObjs=addInteractiveSquares(GridObj,squareObjs,coinObjs,Coin);
 
 PlayerObj.totalCoins = coinObjs.length;
+PlayerObj.totalEnemies = enemiesObjs.length;
 PlayerObj.collectCoin();
+PlayerObj.killEnemy();
 
 GridObj.addWalls(squareObjs);
 
-var t=setInterval(function () {
-    moveEnemies(enemiesObjs,squareObjs)
+var moveE=setInterval(function () {
+    moveEnemies(enemiesObjs,squareObjs);
     },
     300);
+
+var moveB=setInterval(function () {
+    moveBullets(PlayerObj,squareObjs,GridObj);
+    },
+    5);
 
 window.addEventListener("keydown",checkKey);
