@@ -24,6 +24,22 @@ h1 {
     border-bottom:1px solid;
 }
 
+h2 {
+    font-size: 3.5vh;
+    font-weight: 400;
+    margin-top:0;
+    padding-bottom:2vh;
+    width: 30vh;
+    border-bottom:1px solid;
+}
+
+p {
+    width: 40vh;
+    font-size: 2vh;
+    margin-top:0;
+    margin-bottom:3vh;
+}
+
 .squares {
     display:flex;
     width: 35vh;
@@ -67,7 +83,7 @@ button:hover {
     width: 20vh;
 }
 
-.rules {
+.rules, .home {
     padding:1vh;
     font-size: 2vh;
     width: 16vh;
