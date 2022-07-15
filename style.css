@@ -34,10 +34,11 @@ h2 {
 }
 
 p {
-    width: 40vh;
+    width: 30vh;
     font-size: 2vh;
     margin-top:0;
     margin-bottom:3vh;
+    font-weight:300;
 }
 
 .squares {
