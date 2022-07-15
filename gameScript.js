@@ -37,7 +37,7 @@ function Grid() {
     this.addWalls = function (squareObjs) {
         const numOfSquares=this.c*this.r;
         const totalWallSquares=Math.round(numOfSquares/5);
-        const num1=Math.round(numOfSquares/200);
+        const num1=Math.round(numOfSquares/100);
         const num2=Math.round(numOfSquares/50);
         let addedWallSquares=0;
         while (addedWallSquares < totalWallSquares) {
@@ -45,19 +45,25 @@ function Grid() {
             addedWallSquares+=wallLength;
             let wallDirection=randomInt(1,4);
             let start=randomInt(0,numOfSquares-1)
-            // 1: left, 2: right, 3: up, 4: down
+            // 1: right, 2: left, 3: up, 4: down
 
             if (wallDirection === 1) {
                 for (let i=0; i < wallLength; i++) {
-                    if (squareObjs[start+i] !== undefined && squareObjs[start+(i+1)] !== undefined) {
-                        if (squareObjs[start+i].color===this.emptyColor && squareObjs[start+(i+1)].color===this.emptyColor) {
+                    try {
+                        if (squareObjs[start+i].color===this.emptyColor 
+                        && squareObjs[start+(i+1)].color===this.emptyColor //right 1
+                        && squareObjs[start-(i*this.c)].color===this.emptyColor //up
+                        && squareObjs[start+(i*this.c)].color===this.emptyColor //down
+                        && squareObjs[start-(i*this.c)+(i+1)].color===this.emptyColor //up,right 1
+                        && squareObjs[start+(i*this.c)+(i+1)].color===this.emptyColor //down,right 1
+                        ) {
                             squareObjs[start+i].changeColor(this.wallColor);
                         }
                         else {
                             addedWallSquares-=1;
                         }
                     }
-                    else {
+                    catch {
                         addedWallSquares-=1;
                     }
                 }
@@ -65,15 +71,21 @@ function Grid() {
 
             if (wallDirection === 2) {
                 for (let i=0; i < wallLength; i++) {
-                    if (squareObjs[start-i] !== undefined && squareObjs[start-(i+1)] !== undefined) {
-                        if (squareObjs[start-i].color===this.emptyColor && squareObjs[start-(i+1)].color===this.emptyColor) {
+                    try {
+                        if (squareObjs[start-i].color===this.emptyColor 
+                        && squareObjs[start-(i+1)].color===this.emptyColor // left 1
+                        && squareObjs[start-(i*this.c)].color===this.emptyColor //up
+                        && squareObjs[start+(i*this.c)].color===this.emptyColor //down
+                        && squareObjs[start-(i*this.c)-(i+1)].color===this.emptyColor //up,left 1
+                        && squareObjs[start+(i*this.c)-(i+1)].color===this.emptyColor //down,left 1 
+                        ) {
                             squareObjs[start-i].changeColor(this.wallColor);
                         }
                         else {
                             addedWallSquares-=1;
                         }
                     }
-                    else {
+                    catch {
                         addedWallSquares-=1;
                     }
                 }
@@ -81,15 +93,21 @@ function Grid() {
 
             if (wallDirection === 3) {
                 for (let i=0; i < wallLength; i++) {
-                    if (squareObjs[start-(i*this.c)] !== undefined && squareObjs[start-((i+1)*this.c)] !== undefined) {
-                        if (squareObjs[start-(i*this.c)].color===this.emptyColor && squareObjs[start-((i+1)*this.c)].color===this.emptyColor) {
+                    try {
+                        if (squareObjs[start-(i*this.c)].color===this.emptyColor 
+                        && squareObjs[start-((i+1)*this.c)].color===this.emptyColor
+                        && squareObjs[(start-(i*this.c))+1].color===this.emptyColor //right
+                        && squareObjs[(start-(i*this.c))-1].color===this.emptyColor //left
+                        && squareObjs[(start-((i+1)*this.c))+1].color===this.emptyColor //up, right
+                        && squareObjs[(start-((i+1)*this.c))-1].color===this.emptyColor //up, left
+                        ) {
                             squareObjs[start-(i*this.c)].changeColor(this.wallColor);
                         }
                         else {
                             addedWallSquares-=1;
                         }
                     }
-                    else {
+                    catch {
                         addedWallSquares-=1;
                     }
                 }
@@ -97,15 +115,21 @@ function Grid() {
 
             if (wallDirection === 4) {
                 for (let i=0; i < wallLength; i++) {
-                    if (squareObjs[start+(i*this.c)] !== undefined && squareObjs[start+((i+1)*this.c)] !== undefined) {
-                        if (squareObjs[start+(i*this.c)].color===this.emptyColor && squareObjs[start+((i+1)*this.c)].color===this.emptyColor) {
+                    try {
+                        if (squareObjs[start+(i*this.c)].color===this.emptyColor 
+                        && squareObjs[start+((i+1)*this.c)].color===this.emptyColor
+                        && squareObjs[(start+(i*this.c))+1].color===this.emptyColor //right
+                        && squareObjs[(start+(i*this.c))-1].color===this.emptyColor //left
+                        && squareObjs[(start+((i+1)*this.c))+1].color===this.emptyColor //down, right
+                        && squareObjs[(start+((i+1)*this.c))-1].color===this.emptyColor //down, left
+                        ) {
                             squareObjs[start+(i*this.c)].changeColor(this.wallColor);
                         }
                         else {
                             addedWallSquares-=1;
                         }
                     }
-                    else {
+                    catch {
                         addedWallSquares-=1;
                     }
                 }
@@ -202,18 +226,8 @@ function Enemy(GridObj) {
     }
     this.color="#00b4d8";
     this.divIndex;
-    this.x=3;
-    this.y=3;
-    this.findSquare = function (squareObjs) {
-        this.x=randomInt(1, GridObj.c-2);
-        this.y=randomInt(1, GridObj.r-2);
-        for (let i=0;i < squareObjs.length; i++) {
-            if (squareObjs[i].y === this.y && squareObjs[i].x === this.x) {
-                squareObjs[i].changeColor(this.color);
-                this.divIndex=i;
-            }
-        }
-    }
+    this.x;
+    this.y;
 
     this.moveRight = function (squareObjs) {
         if (squareObjs[this.divIndex+1].color === "#26313b") {
@@ -274,6 +288,24 @@ function Enemy(GridObj) {
     }
 }
 
+Enemy.prototype.findSquare = function (squareObjs) {
+        this.x=randomInt(1, GridObj.c-2);
+        this.y=randomInt(1, GridObj.r-2);
+        for (let i=0;i < squareObjs.length; i++) {
+            if (squareObjs[i].y === this.y && squareObjs[i].x === this.x) {
+                squareObjs[i].changeColor(this.color);
+                this.divIndex=i;
+            }
+        }
+}
+
+function Coin(GridObj) {
+    if (!(this instanceof Coin)) {
+        return new Coin(GridObj);
+    }
+    this.color="#ffc857";
+}
+
 function checkKey(e) {
     if (e.code == "KeyW") {
         PlayerObj.moveUp(squareObjs);
@@ -289,14 +321,18 @@ function checkKey(e) {
     }
 }
 
-function addEnemies(GridObj,squareObjs,enemiesObjs) {
+function addInteractiveSquares(GridObj,squareObjs,interactiveObjs,ObjType) {
     const numOfSquares = GridObj.r*GridObj.c;
-    const numOfEnemies = Math.round(numOfSquares/75);
-    for (let i=0;i < numOfEnemies; i++) {
-        var EnemyObj=new Enemy(GridObj);
-        EnemyObj.findSquare(squareObjs);
-        enemiesObjs.push(EnemyObj);
+    const num = Math.round(numOfSquares/75);
+    for (let i=0;i < num; i++) {
+        if (ObjType === Coin) {
+            Coin.prototype=Object.create(Enemy.prototype);
+        }
+        var Obj=new ObjType(GridObj);
+        Obj.findSquare(squareObjs);
+        interactiveObjs.push(Obj);
     }
+    return interactiveObjs;
 }
 
 function moveEnemies(enemiesObjs,squareObjs) {
@@ -307,6 +343,7 @@ function moveEnemies(enemiesObjs,squareObjs) {
 
 let squareObjs=[];
 let enemiesObjs=[];
+let coinObjs=[];
 var GridObj= new Grid();
 GridObj.setup();
 GridObj.create(squareObjs);
@@ -314,7 +351,8 @@ GridObj.create(squareObjs);
 var PlayerObj= new Player(GridObj);
 PlayerObj.findSquare(squareObjs);
 
-addEnemies(GridObj,squareObjs,enemiesObjs);
+enemiesObjs=addInteractiveSquares(GridObj,squareObjs,enemiesObjs,Enemy);
+coinObjs=addInteractiveSquares(GridObj,squareObjs,coinObjs,Coin);
 
 GridObj.addWalls(squareObjs);
 
