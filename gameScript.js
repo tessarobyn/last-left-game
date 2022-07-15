@@ -196,11 +196,12 @@ function Bullet(direction,divIndex,c,r) {
         const body=document.getElementsByTagName("body")[0];
         const xSquare=Math.floor(this.x/(body.offsetWidth/c));
         const ySquare=Math.floor(this.y/(body.offsetHeight/r));
-        let i=ySquare*c+xSquare;
-        if (squareObjs[i] !== undefined) {
-            if (squareObjs[i].color === "#00b4d8") {
-                squareObjs[i].changeColor("#26313b");
-                PlayerObj.killEnemy(xSquare,ySquare);
+        let index=ySquare*c+xSquare;
+        for (let i=0; i < PlayerObj.enemiesObjs.length; i++) {
+            if (PlayerObj.enemiesObjs[i].divIndex === index) {
+                PlayerObj.enemiesObjs.splice(i,1);
+                squareObjs[index].changeColor("#26313b");
+                PlayerObj.showKillEnemy();
                 for (let i = 0;i < PlayerObj.BulletObjs.length; i++) {
                     if (PlayerObj.BulletObjs[i].x === this.x && PlayerObj.BulletObjs[i].y === this.y) {
                         const container = document.getElementById("bulletContainer");
@@ -246,6 +247,7 @@ function Player(GridObj) {
     this.divIndex;
     this.direction="up";
     this.BulletObjs=[];
+    this.enemiesObjs=[];
     this.findSquare = function (squareObjs) {
         for (let i=0;i < squareObjs.length; i++) {
             if (squareObjs[i].y === this.y && squareObjs[i].x === this.x) {
@@ -263,7 +265,7 @@ function Player(GridObj) {
             squareObjs[this.divIndex].changeColor("#26313b");
             this.divIndex+=1;
             if (squareObjs[this.divIndex].color === this.coinColor) {
-                this.collectCoin();
+                this.showCollectCoin();
             }
             squareObjs[this.divIndex].changeColor(this.color);
             this.direction="right";
@@ -277,7 +279,7 @@ function Player(GridObj) {
             squareObjs[this.divIndex].changeColor("#26313b");
             this.divIndex-=1;
             if (squareObjs[this.divIndex].color === this.coinColor) {
-                this.collectCoin(coinObjs.length);
+                this.showCollectCoin(coinObjs.length);
             }
             squareObjs[this.divIndex].changeColor(this.color);
             this.direction="left";
@@ -291,7 +293,7 @@ function Player(GridObj) {
             squareObjs[this.divIndex].changeColor("#26313b");
             this.divIndex-=GridObj.c;
             if (squareObjs[this.divIndex].color === this.coinColor) {
-                this.collectCoin(coinObjs.length);
+                this.showCollectCoin(coinObjs.length);
             }
             squareObjs[this.divIndex].changeColor(this.color);
             this.direction="up";
@@ -305,7 +307,7 @@ function Player(GridObj) {
             squareObjs[this.divIndex].changeColor("#26313b");
             this.divIndex+=GridObj.c;
             if (squareObjs[this.divIndex].color === this.coinColor) {
-                this.collectCoin(coinObjs.length);
+                this.showCollectCoin(coinObjs.length);
             }
             squareObjs[this.divIndex].changeColor(this.color);
             this.direction="down";
@@ -315,23 +317,16 @@ function Player(GridObj) {
         }
     }
 
-    this.collectCoin = function() {
+    this.showCollectCoin = function() {
         const coinCount=document.getElementById("coinCount");
         this.coinsCollected+=1
         coinCount.innerText="Coins collected: "+String(this.coinsCollected)+"/"+String(this.totalCoins);
     }
 
-    this.killEnemy = function(x,y) {
-        for (let i = 0; i < enemiesObjs.length; i++) {
-            if (enemiesObjs[i].y === y && enemiesObjs[i].y === y) {
-                console.log("Enemies: " +enemiesObjs.length);
-                enemiesObjs.splice(i,1);
-                console.log("Enemies2: " +enemiesObjs.length);
-                const killCount=document.getElementById("killCount");
-                this.enemiesKilled+=1
-                killCount.innerText="Enemies killed: "+String(this.enemiesKilled)+"/"+String(this.totalEnemies);
-            }
-        }
+    this.showKillEnemy = function() {
+        const killCount=document.getElementById("killCount");
+        this.enemiesKilled+=1
+        killCount.innerText="Enemies killed: "+String(this.enemiesKilled)+"/"+String(this.totalEnemies);
     } 
 
     this.shoot = function() {
@@ -463,9 +458,9 @@ function addInteractiveSquares(GridObj,squareObjs,interactiveObjs,ObjType) {
     return interactiveObjs;
 }
 
-function moveEnemies(enemiesObjs,squareObjs) {
-    for (let i = 0; i < enemiesObjs.length; i++) {
-        enemiesObjs[i].move(squareObjs);
+function moveEnemies(PlayerObj,squareObjs) {
+    for (let i = 0; i < PlayerObj.enemiesObjs.length; i++) {
+        PlayerObj.enemiesObjs[i].move(squareObjs);
     }
 }
 
@@ -476,9 +471,13 @@ function moveBullets(PlayerObj,squareObjs,GridObj) {
     }
 }
 
+function checkFinish(PlayerObj) {
+    if (PlayerObj.)
+}
+
 let squareObjs=[];
-let enemiesObjs=[];
 let coinObjs=[];
+let enemiesObjs=[];
 var GridObj= new Grid();
 GridObj.setup();
 GridObj.create(squareObjs);
@@ -491,15 +490,16 @@ coinObjs=addInteractiveSquares(GridObj,squareObjs,coinObjs,Coin);
 
 PlayerObj.totalCoins = coinObjs.length;
 PlayerObj.totalEnemies = enemiesObjs.length;
-PlayerObj.collectCoin();
-PlayerObj.killEnemy(0,0,enemiesObjs);
+PlayerObj.enemiesObjs=enemiesObjs;
+PlayerObj.showCollectCoin();
+PlayerObj.showKillEnemy();
 
 GridObj.addWalls(squareObjs);
 
 var moveE=setInterval(function () {
-    moveEnemies(enemiesObjs,squareObjs);
+    moveEnemies(PlayerObj,squareObjs);
     },
-    300);
+    500);
 
 var moveB=setInterval(function () {
     moveBullets(PlayerObj,squareObjs,GridObj);
