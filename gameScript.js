@@ -171,6 +171,7 @@ function Bullet(direction,divIndex,c,r) {
     this.length=1;
     this.width=0.5;
     this.bulletDiv;
+
     this.add = function (c,r) {
         const bullet = document.createElement("div");
         bullet.classList.add("bullet");
@@ -192,14 +193,14 @@ function Bullet(direction,divIndex,c,r) {
         container.appendChild(bullet);
     }
 
-    this.checkKill = function (squareObjs,c,r,PlayerObj) {
+    this.checkKill = function (squareObjs,c,r,enemiesObjs) {
         const body=document.getElementsByTagName("body")[0];
         const xSquare=Math.floor(this.x/(body.offsetWidth/c));
         const ySquare=Math.floor(this.y/(body.offsetHeight/r));
         let index=ySquare*c+xSquare;
-        for (let i=0; i < PlayerObj.enemiesObjs.length; i++) {
-            if (PlayerObj.enemiesObjs[i].divIndex === index) {
-                PlayerObj.enemiesObjs.splice(i,1);
+        for (let i=0; i < enemiesObjs.length; i++) {
+            if (enemiesObjs[i].divIndex === index) {
+                enemiesObjs.splice(i,1);
                 squareObjs[index].changeColor("#26313b");
                 PlayerObj.killEnemy();
                 for (let i = 0;i < PlayerObj.BulletObjs.length; i++) {
@@ -258,7 +259,6 @@ function Player(GridObj) {
     this.divIndex;
     this.direction="up";
     this.BulletObjs=[];
-    this.enemiesObjs=[];
     this.findSquare = function (squareObjs) {
         for (let i=0;i < squareObjs.length; i++) {
             if (squareObjs[i].y === this.y && squareObjs[i].x === this.x) {
@@ -469,16 +469,16 @@ function addInteractiveSquares(GridObj,squareObjs,interactiveObjs,ObjType) {
     return interactiveObjs;
 }
 
-function moveEnemies(PlayerObj,squareObjs) {
-    for (let i = 0; i < PlayerObj.enemiesObjs.length; i++) {
-        PlayerObj.enemiesObjs[i].move(squareObjs);
+function moveEnemies(squareObjs,enemiesObjs) {
+    for (let i = 0; i < enemiesObjs.length; i++) {
+        enemiesObjs[i].move(squareObjs);
     }
 }
 
-function moveBullets(PlayerObj,squareObjs,GridObj) {
+function moveBullets(PlayerObj,squareObjs,GridObj,) {
     for (let i = 0; i < PlayerObj.BulletObjs.length; i++) {
         PlayerObj.BulletObjs[i].move();
-        PlayerObj.BulletObjs[i].checkKill(squareObjs,GridObj.c,GridObj.r,PlayerObj);
+        PlayerObj.BulletObjs[i].checkKill(squareObjs,GridObj.c,GridObj.r,enemiesObjs);
     }
 }
 
@@ -496,7 +496,7 @@ function deleteBullets(PlayerObj) {
 }
 
 function checkFinish(PlayerObj) {
-    if (PlayerObj.coinsCollected === PlayerObj.totalCoins && PlayerObj.enemiesKilled === PlayerObj.totalEnemies) {
+    if (PlayerObj.coinsCollected === totalCoins && PlayerObj.enemiesKilled === totalEnemies) {
         window.location.href="win.html";
     }
 }
@@ -526,7 +526,7 @@ EnemyText.update(0);
 GridObj.addWalls(squareObjs);
 
 var moveE=setInterval(function () {
-    moveEnemies(PlayerObj,squareObjs);
+    moveEnemies(squareObjs,enemiesObjs);
     },
     500);
 
