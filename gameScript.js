@@ -226,8 +226,9 @@ function Bullet(direction,divIndex,c,r) {
         if (this.direction === "down") {
             this.y+=3;
         }
+        
         this.bullet.style.top=this.y+"px";
-        this.bullet.style.left=this.x+"px";
+        this.bullet.style.left=this.x+"px"; 
     }
 }
 
@@ -473,6 +474,19 @@ function moveBullets(PlayerObj,squareObjs,GridObj) {
     }
 }
 
+function deleteBullets(PlayerObj) {
+    const body = document.getElementsByTagName("body")[0];
+    const maxWidth = body.offsetWidth;
+    const maxHeight = body.offsetHeight;
+    for (let i = 0;i < PlayerObj.BulletObjs.length; i++) {
+        if (PlayerObj.BulletObjs[i].x < 0 || PlayerObj.BulletObjs[i].x > maxWidth || PlayerObj.BulletObjs[i].y < 0 || PlayerObj.BulletObjs[i].y > maxHeight) {
+            const container = document.getElementById("bulletContainer");
+            container.removeChild(PlayerObj.BulletObjs[i].bullet);
+            PlayerObj.BulletObjs.splice(i,1);
+        }
+    }
+}
+
 function checkFinish(PlayerObj) {
     if (PlayerObj.coinsCollected === PlayerObj.totalCoins && PlayerObj.enemiesKilled === PlayerObj.totalEnemies) {
         window.location.href="win.html";
@@ -507,6 +521,11 @@ var moveE=setInterval(function () {
 
 var moveB=setInterval(function () {
     moveBullets(PlayerObj,squareObjs,GridObj);
+    },
+    5);
+
+var deleteB=setInterval(function () {
+    deleteBullets(PlayerObj);
     },
     5);
 
