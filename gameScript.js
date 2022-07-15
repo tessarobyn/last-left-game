@@ -516,7 +516,6 @@ coinObjs=addInteractiveSquares(GridObj,squareObjs,coinObjs,Coin);
 
 let totalCoins = coinObjs.length;
 let totalEnemies = enemiesObjs.length;
-PlayerObj.enemiesObjs=enemiesObjs;
 
 CoinText=new UIText(document.getElementById("coinCount"), "Coins collected: ", totalCoins);
 CoinText.update(0);
