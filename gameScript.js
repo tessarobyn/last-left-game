@@ -201,10 +201,14 @@ function Bullet(direction,divIndex,c,r) {
             if (squareObjs[i].color === "#00b4d8") {
                 squareObjs[i].changeColor("#26313b");
                 PlayerObj.killEnemy(xSquare,ySquare);
+                for (let i = 0;i < PlayerObj.BulletObjs.length; i++) {
+                    if (PlayerObj.BulletObjs[i].x === this.x && PlayerObj.BulletObjs[i].y === this.y) {
+                        const container = document.getElementById("bulletContainer");
+                        container.removeChild(this.bullet);
+                        PlayerObj.BulletObjs.splice(i,1);
+                    }
+                }
             }
-        else {
-            PlayerObj.BulletObjs.splice(i,1);
-        }
         }
     }
     
@@ -320,12 +324,14 @@ function Player(GridObj) {
     this.killEnemy = function(x,y) {
         for (let i = 0; i < enemiesObjs.length; i++) {
             if (enemiesObjs[i].y === y && enemiesObjs[i].y === y) {
+                console.log("Enemies: " +enemiesObjs.length);
                 enemiesObjs.splice(i,1);
+                console.log("Enemies2: " +enemiesObjs.length);
+                const killCount=document.getElementById("killCount");
+                this.enemiesKilled+=1
+                killCount.innerText="Enemies killed: "+String(this.enemiesKilled)+"/"+String(this.totalEnemies);
             }
         }
-        const coinCount=document.getElementById("killCount");
-        this.enemiesKilled+=1
-        coinCount.innerText="Enemies killed: "+String(this.enemiesKilled)+"/"+String(this.totalEnemies);
     } 
 
     this.shoot = function() {
@@ -486,7 +492,7 @@ coinObjs=addInteractiveSquares(GridObj,squareObjs,coinObjs,Coin);
 PlayerObj.totalCoins = coinObjs.length;
 PlayerObj.totalEnemies = enemiesObjs.length;
 PlayerObj.collectCoin();
-PlayerObj.killEnemy();
+PlayerObj.killEnemy(0,0,enemiesObjs);
 
 GridObj.addWalls(squareObjs);
 
