@@ -37,7 +37,7 @@ function Grid() {
     this.addWalls = function (squareObjs) {
         const numOfSquares=this.c*this.r;
         const totalWallSquares=Math.round(numOfSquares/5);
-        const num1=Math.round(numOfSquares/200);
+        const num1=Math.round(numOfSquares/100);
         const num2=Math.round(numOfSquares/50);
         let addedWallSquares=0;
         while (addedWallSquares < totalWallSquares) {
@@ -45,19 +45,27 @@ function Grid() {
             addedWallSquares+=wallLength;
             let wallDirection=randomInt(1,4);
             let start=randomInt(0,numOfSquares-1)
-            // 1: left, 2: right, 3: up, 4: down
+            // 1: right, 2: left, 3: up, 4: down
 
             if (wallDirection === 1) {
                 for (let i=0; i < wallLength; i++) {
-                    if (squareObjs[start+i] !== undefined && squareObjs[start+(i+1)] !== undefined) {
-                        if (squareObjs[start+i].color===this.emptyColor && squareObjs[start+(i+1)].color===this.emptyColor) {
+                    try {
+                        if (squareObjs[start+i].color===this.emptyColor 
+                        && squareObjs[start+(i+1)].color===this.emptyColor //right 1
+                        && squareObjs[start-(i*this.c)].color===this.emptyColor //up
+                        && squareObjs[start+(i*this.c)].color===this.emptyColor //down
+                        && squareObjs[(start-(i*this.c))+(i+1)].color===this.emptyColor //up,right 1
+                        && squareObjs[(start+(i*this.c))+(i+1)].color===this.emptyColor //down,right 1
+                        && squareObjs[(start-(i*this.c))-(i+1)].color===this.emptyColor //up,left 1
+                        && squareObjs[(start+(i*this.c))+(i+1)].color===this.emptyColor //down,left 1 
+                        ) {
                             squareObjs[start+i].changeColor(this.wallColor);
                         }
                         else {
                             addedWallSquares-=1;
                         }
                     }
-                    else {
+                    catch {
                         addedWallSquares-=1;
                     }
                 }
@@ -65,15 +73,23 @@ function Grid() {
 
             if (wallDirection === 2) {
                 for (let i=0; i < wallLength; i++) {
-                    if (squareObjs[start-i] !== undefined && squareObjs[start-(i+1)] !== undefined) {
-                        if (squareObjs[start-i].color===this.emptyColor && squareObjs[start-(i+1)].color===this.emptyColor) {
+                    try {
+                        if (squareObjs[start-i].color===this.emptyColor 
+                        && squareObjs[start-(i+1)].color===this.emptyColor // left 1
+                        && squareObjs[start-(i*this.c)].color===this.emptyColor //up
+                        && squareObjs[start+(i*this.c)].color===this.emptyColor //down
+                        && squareObjs[(start-(i*this.c))-(i+1)].color===this.emptyColor //up,left 1
+                        && squareObjs[(start+(i*this.c))-(i+1)].color===this.emptyColor //down,left 1 
+                        && squareObjs[(start-(i*this.c))+(i+1)].color===this.emptyColor //up,right 1
+                        && squareObjs[(start+(i*this.c))+(i+1)].color===this.emptyColor //down,right 1
+                        ) {
                             squareObjs[start-i].changeColor(this.wallColor);
                         }
                         else {
                             addedWallSquares-=1;
                         }
                     }
-                    else {
+                    catch {
                         addedWallSquares-=1;
                     }
                 }
@@ -81,15 +97,23 @@ function Grid() {
 
             if (wallDirection === 3) {
                 for (let i=0; i < wallLength; i++) {
-                    if (squareObjs[start-(i*this.c)] !== undefined && squareObjs[start-((i+1)*this.c)] !== undefined) {
-                        if (squareObjs[start-(i*this.c)].color===this.emptyColor && squareObjs[start-((i+1)*this.c)].color===this.emptyColor) {
+                    try {
+                        if (squareObjs[start-(i*this.c)].color===this.emptyColor 
+                        && squareObjs[start-((i+1)*this.c)].color===this.emptyColor
+                        && squareObjs[(start-(i*this.c))+1].color===this.emptyColor //right
+                        && squareObjs[(start-(i*this.c))-1].color===this.emptyColor //left
+                        && squareObjs[(start-((i+1)*this.c))+1].color===this.emptyColor //up, right
+                        && squareObjs[(start-((i+1)*this.c))-1].color===this.emptyColor //up, left
+                        && squareObjs[(start+((i+1)*this.c))+1].color===this.emptyColor //down, right
+                        && squareObjs[(start+((i+1)*this.c))-1].color===this.emptyColor //down, left
+                        ) {
                             squareObjs[start-(i*this.c)].changeColor(this.wallColor);
                         }
                         else {
                             addedWallSquares-=1;
                         }
                     }
-                    else {
+                    catch {
                         addedWallSquares-=1;
                     }
                 }
@@ -97,26 +121,29 @@ function Grid() {
 
             if (wallDirection === 4) {
                 for (let i=0; i < wallLength; i++) {
-                    if (squareObjs[start+(i*this.c)] !== undefined && squareObjs[start+((i+1)*this.c)] !== undefined) {
-                        if (squareObjs[start+(i*this.c)].color===this.emptyColor && squareObjs[start+((i+1)*this.c)].color===this.emptyColor) {
+                    try {
+                        if (squareObjs[start+(i*this.c)].color===this.emptyColor 
+                        && squareObjs[start+((i+1)*this.c)].color===this.emptyColor
+                        && squareObjs[(start+(i*this.c))+1].color===this.emptyColor //right
+                        && squareObjs[(start+(i*this.c))-1].color===this.emptyColor //left
+                        && squareObjs[(start+((i+1)*this.c))+1].color===this.emptyColor //down, right
+                        && squareObjs[(start+((i+1)*this.c))-1].color===this.emptyColor //down, left
+                        && squareObjs[(start-((i+1)*this.c))+1].color===this.emptyColor //up, right
+                        && squareObjs[(start-((i+1)*this.c))-1].color===this.emptyColor //up, left
+                        ) {
                             squareObjs[start+(i*this.c)].changeColor(this.wallColor);
                         }
                         else {
                             addedWallSquares-=1;
                         }
                     }
-                    else {
+                    catch {
                         addedWallSquares-=1;
                     }
                 }
             }
         }
 
-    }
-
-    this.floodCheck = function (squareObjs) {
-        let startx = 1;
-        let starty = 1;
     }
 }
 
@@ -141,20 +168,100 @@ function Player(GridObj) {
     this.x=Math.floor(GridObj.c/2);
     this.y=Math.floor(GridObj.r/2);
     this.color="#ff3366";
+    this.enemyColor="#00b4d8";
+    this.coinColor="#ffc857";
+    this.coinsCollected=-1;
+    this.totalCoins;
     this.divIndex;
     this.findSquare = function (squareObjs) {
         for (let i=0;i < squareObjs.length; i++) {
             if (squareObjs[i].y === this.y && squareObjs[i].x === this.x) {
-                squareObjs[i].changeColor("#ff3366");
+                squareObjs[i].changeColor(this.color);
                 this.divIndex=i;
             }
         }
     }
+    this.kill = function () {
+        window.location.href="gameOver.html";
+    }
+
+    this.moveRight = function (squareObjs) {
+        if (squareObjs[this.divIndex+1].color === "#26313b" || squareObjs[this.divIndex+1].color === this.coinColor) {
+            squareObjs[this.divIndex].changeColor("#26313b");
+            this.divIndex+=1;
+            if (squareObjs[this.divIndex].color === this.coinColor) {
+                this.collectCoin();
+            }
+            squareObjs[this.divIndex].changeColor(this.color);
+        }
+        else if (squareObjs[this.divIndex+1].color === this.enemyColor) {
+            this.kill();
+        }
+    }
+    this.moveLeft = function (squareObjs) {
+        if (squareObjs[this.divIndex-1].color === "#26313b" || squareObjs[this.divIndex-1].color === this.coinColor) {
+            squareObjs[this.divIndex].changeColor("#26313b");
+            this.divIndex-=1;
+            if (squareObjs[this.divIndex].color === this.coinColor) {
+                this.collectCoin(coinObjs.length);
+            }
+            squareObjs[this.divIndex].changeColor(this.color);
+        }
+        else if (squareObjs[this.divIndex-1].color === this.enemyColor) {
+            this.kill();
+        }
+    }
+    this.moveUp = function (squareObjs) {
+        if (squareObjs[this.divIndex-GridObj.c].color === "#26313b" || squareObjs[this.divIndex-GridObj.c].color === this.coinColor) {
+            squareObjs[this.divIndex].changeColor("#26313b");
+            this.divIndex-=GridObj.c;
+            if (squareObjs[this.divIndex].color === this.coinColor) {
+                this.collectCoin(coinObjs.length);
+            }
+            squareObjs[this.divIndex].changeColor(this.color);
+        }
+        else if (squareObjs[this.divIndex-GridObj.c].color === this.enemyColor) {
+            this.kill();
+        }
+    }
+    this.moveDown = function (squareObjs) {
+        if (squareObjs[this.divIndex+GridObj.c].color === "#26313b" || squareObjs[this.divIndex+GridObj.c].color === this.coinColor) {
+            squareObjs[this.divIndex].changeColor("#26313b");
+            this.divIndex+=GridObj.c;
+            if (squareObjs[this.divIndex].color === this.coinColor) {
+                this.collectCoin(coinObjs.length);
+            }
+            squareObjs[this.divIndex].changeColor(this.color);
+        }
+        else if (squareObjs[this.divIndex+GridObj.c].color === this.enemyColor) {
+            this.kill();
+        }
+    }
+
+    this.collectCoin = function() {
+        const coinCount=document.getElementById("coinCount");
+        this.coinsCollected+=1
+        coinCount.innerText="Coins collected: "+String(this.coinsCollected)+"/"+String(this.totalCoins);
+    }
+}
+
+function Enemy(GridObj) {
+    if (!(this instanceof Enemy)) {
+        return new Enemy(GridObj);
+    }
+    this.color="#00b4d8";
+    this.divIndex;
+    this.x;
+    this.y;
+
     this.moveRight = function (squareObjs) {
         if (squareObjs[this.divIndex+1].color === "#26313b") {
             squareObjs[this.divIndex].changeColor("#26313b");
             this.divIndex+=1;
             squareObjs[this.divIndex].changeColor(this.color);
+        }
+        else if (squareObjs[this.divIndex+1].color === PlayerObj.color) {
+            PlayerObj.kill();
         }
     }
     this.moveLeft = function (squareObjs) {
@@ -163,12 +270,18 @@ function Player(GridObj) {
             this.divIndex-=1;
             squareObjs[this.divIndex].changeColor(this.color);
         }
+        else if (squareObjs[this.divIndex-1].color === PlayerObj.color) {
+            PlayerObj.kill();
+        }
     }
     this.moveUp = function (squareObjs) {
         if (squareObjs[this.divIndex-GridObj.c].color === "#26313b") {
             squareObjs[this.divIndex].changeColor("#26313b");
             this.divIndex-=GridObj.c;
             squareObjs[this.divIndex].changeColor(this.color);
+        }
+        else if (squareObjs[this.divIndex-GridObj.c].color === PlayerObj.color) {
+            PlayerObj.kill();
         }
     }
     this.moveDown = function (squareObjs) {
@@ -177,7 +290,45 @@ function Player(GridObj) {
             this.divIndex+=GridObj.c;
             squareObjs[this.divIndex].changeColor(this.color);
         }
+        else if (squareObjs[this.divIndex+GridObj.c].color === PlayerObj.color) {
+            PlayerObj.kill();
+        }
     }
+
+    this.move=function(squareObjs) {
+            let move = randomInt(1,4);
+            if (move === 1) {
+                this.moveRight(squareObjs);
+            }
+            else if (move === 2) {
+                this.moveLeft(squareObjs);
+            }
+            else if (move === 3) {
+                this.moveUp(squareObjs);
+            }
+            else if (move === 4) {
+                this.moveDown(squareObjs);
+            }
+        
+    }
+}
+
+Enemy.prototype.findSquare = function (squareObjs) {
+        this.x=randomInt(1, GridObj.c-2);
+        this.y=randomInt(1, GridObj.r-2);
+        for (let i=0;i < squareObjs.length; i++) {
+            if (squareObjs[i].y === this.y && squareObjs[i].x === this.x) {
+                squareObjs[i].changeColor(this.color);
+                this.divIndex=i;
+            }
+        }
+}
+
+function Coin(GridObj) {
+    if (!(this instanceof Coin)) {
+        return new Coin(GridObj);
+    }
+    this.color="#ffc857";
 }
 
 function checkKey(e) {
@@ -195,13 +346,47 @@ function checkKey(e) {
     }
 }
 
+function addInteractiveSquares(GridObj,squareObjs,interactiveObjs,ObjType) {
+    const numOfSquares = GridObj.r*GridObj.c;
+    const num = Math.round(numOfSquares/75);
+    for (let i=0;i < num; i++) {
+        if (ObjType === Coin) {
+            Coin.prototype=Object.create(Enemy.prototype);
+        }
+        var Obj=new ObjType(GridObj);
+        Obj.findSquare(squareObjs);
+        interactiveObjs.push(Obj);
+    }
+    return interactiveObjs;
+}
+
+function moveEnemies(enemiesObjs,squareObjs) {
+    for (let i = 0; i < enemiesObjs.length; i++) {
+        enemiesObjs[i].move(squareObjs);
+    }
+}
+
 let squareObjs=[];
+let enemiesObjs=[];
+let coinObjs=[];
 var GridObj= new Grid();
 GridObj.setup();
 GridObj.create(squareObjs);
-GridObj.addWalls(squareObjs);
+
 var PlayerObj= new Player(GridObj);
 PlayerObj.findSquare(squareObjs);
-PlayerObj.moveUp(squareObjs);
+
+enemiesObjs=addInteractiveSquares(GridObj,squareObjs,enemiesObjs,Enemy);
+coinObjs=addInteractiveSquares(GridObj,squareObjs,coinObjs,Coin);
+
+PlayerObj.totalCoins = coinObjs.length;
+PlayerObj.collectCoin();
+
+GridObj.addWalls(squareObjs);
+
+var t=setInterval(function () {
+    moveEnemies(enemiesObjs,squareObjs)
+    },
+    300);
 
 window.addEventListener("keydown",checkKey);
