@@ -152,7 +152,7 @@ function Square(div,x,y) {
         return new Square(div,x,y);
     }
     this.div=div,
-    this.color="#26313b";
+    this.color="#26313b",
     this.x= x,
     this.y= y,
     this.changeColor = function (color) {
@@ -170,7 +170,8 @@ function Bullet(direction,divIndex,c,r) {
     this.direction=direction;
     this.length=1;
     this.width=0.5;
-    this.bullet;
+    this.bulletDiv;
+
     this.add = function (c,r) {
         const bullet = document.createElement("div");
         bullet.classList.add("bullet");
@@ -188,24 +189,24 @@ function Bullet(direction,divIndex,c,r) {
         bullet.style.top=this.y+"px";
         bullet.style.left=this.x+"px";
         const container = document.getElementById("bulletContainer");
-        this.bullet=bullet;
+        this.bulletDiv=bullet;
         container.appendChild(bullet);
     }
 
-    this.checkKill = function (squareObjs,c,r,PlayerObj) {
+    this.checkKill = function (squareObjs,c,r,enemiesObjs) {
         const body=document.getElementsByTagName("body")[0];
         const xSquare=Math.floor(this.x/(body.offsetWidth/c));
         const ySquare=Math.floor(this.y/(body.offsetHeight/r));
         let index=ySquare*c+xSquare;
-        for (let i=0; i < PlayerObj.enemiesObjs.length; i++) {
-            if (PlayerObj.enemiesObjs[i].divIndex === index) {
-                PlayerObj.enemiesObjs.splice(i,1);
+        for (let i=0; i < enemiesObjs.length; i++) {
+            if (enemiesObjs[i].divIndex === index) {
+                enemiesObjs.splice(i,1);
                 squareObjs[index].changeColor("#26313b");
-                PlayerObj.showKillEnemy();
+                PlayerObj.killEnemy();
                 for (let i = 0;i < PlayerObj.BulletObjs.length; i++) {
                     if (PlayerObj.BulletObjs[i].x === this.x && PlayerObj.BulletObjs[i].y === this.y) {
                         const container = document.getElementById("bulletContainer");
-                        container.removeChild(this.bullet);
+                        container.removeChild(this.bulletDiv);
                         PlayerObj.BulletObjs.splice(i,1);
                     }
                 }
@@ -227,8 +228,20 @@ function Bullet(direction,divIndex,c,r) {
             this.y+=3;
         }
         
-        this.bullet.style.top=this.y+"px";
-        this.bullet.style.left=this.x+"px"; 
+        this.bulletDiv.style.top=this.y+"px";
+        this.bulletDiv.style.left=this.x+"px"; 
+    }
+}
+
+function UIText(element,text,total) {
+    if (!(this instanceof UIText)) {
+        return new UIText(element,text,total);
+    }
+    this.element = element,
+    this.text=text,
+    this.total=total,
+    this.update= function (num) {
+        this.element.innerText=this.text+String(num)+"/"+String(this.total);
     }
 }
 
@@ -241,14 +254,11 @@ function Player(GridObj) {
     this.color="#ff3366";
     this.enemyColor="#00b4d8";
     this.coinColor="#ffc857";
-    this.coinsCollected=-1;
-    this.enemiesKilled=-1;
-    this.totalCoins;
-    this.totalEnemies;
+    this.coinsCollected=0;
+    this.enemiesKilled=0;
     this.divIndex;
     this.direction="up";
     this.BulletObjs=[];
-    this.enemiesObjs=[];
     this.findSquare = function (squareObjs) {
         for (let i=0;i < squareObjs.length; i++) {
             if (squareObjs[i].y === this.y && squareObjs[i].x === this.x) {
@@ -266,7 +276,7 @@ function Player(GridObj) {
             squareObjs[this.divIndex].changeColor("#26313b");
             this.divIndex+=1;
             if (squareObjs[this.divIndex].color === this.coinColor) {
-                this.showCollectCoin();
+                this.collectCoin();
             }
             squareObjs[this.divIndex].changeColor(this.color);
             this.direction="right";
@@ -280,7 +290,7 @@ function Player(GridObj) {
             squareObjs[this.divIndex].changeColor("#26313b");
             this.divIndex-=1;
             if (squareObjs[this.divIndex].color === this.coinColor) {
-                this.showCollectCoin(coinObjs.length);
+                this.collectCoin();
             }
             squareObjs[this.divIndex].changeColor(this.color);
             this.direction="left";
@@ -294,7 +304,7 @@ function Player(GridObj) {
             squareObjs[this.divIndex].changeColor("#26313b");
             this.divIndex-=GridObj.c;
             if (squareObjs[this.divIndex].color === this.coinColor) {
-                this.showCollectCoin(coinObjs.length);
+                this.collectCoin();
             }
             squareObjs[this.divIndex].changeColor(this.color);
             this.direction="up";
@@ -308,7 +318,7 @@ function Player(GridObj) {
             squareObjs[this.divIndex].changeColor("#26313b");
             this.divIndex+=GridObj.c;
             if (squareObjs[this.divIndex].color === this.coinColor) {
-                this.showCollectCoin(coinObjs.length);
+                this.collectCoin();
             }
             squareObjs[this.divIndex].changeColor(this.color);
             this.direction="down";
@@ -318,17 +328,15 @@ function Player(GridObj) {
         }
     }
 
-    this.showCollectCoin = function() {
-        const coinCount=document.getElementById("coinCount");
+    this.collectCoin = function() {
         this.coinsCollected+=1
-        coinCount.innerText="Coins collected: "+String(this.coinsCollected)+"/"+String(this.totalCoins);
+        CoinText.update(this.coinsCollected);
         checkFinish(this);
     }
 
-    this.showKillEnemy = function() {
-        const killCount=document.getElementById("killCount");
+    this.killEnemy = function() {
         this.enemiesKilled+=1
-        killCount.innerText="Enemies killed: "+String(this.enemiesKilled)+"/"+String(this.totalEnemies);
+        EnemyText.update(this.enemiesKilled);
         checkFinish(this);
     } 
 
@@ -461,16 +469,16 @@ function addInteractiveSquares(GridObj,squareObjs,interactiveObjs,ObjType) {
     return interactiveObjs;
 }
 
-function moveEnemies(PlayerObj,squareObjs) {
-    for (let i = 0; i < PlayerObj.enemiesObjs.length; i++) {
-        PlayerObj.enemiesObjs[i].move(squareObjs);
+function moveEnemies(squareObjs,enemiesObjs) {
+    for (let i = 0; i < enemiesObjs.length; i++) {
+        enemiesObjs[i].move(squareObjs);
     }
 }
 
-function moveBullets(PlayerObj,squareObjs,GridObj) {
+function moveBullets(PlayerObj,squareObjs,GridObj,) {
     for (let i = 0; i < PlayerObj.BulletObjs.length; i++) {
         PlayerObj.BulletObjs[i].move();
-        PlayerObj.BulletObjs[i].checkKill(squareObjs,GridObj.c,GridObj.r,PlayerObj);
+        PlayerObj.BulletObjs[i].checkKill(squareObjs,GridObj.c,GridObj.r,enemiesObjs);
     }
 }
 
@@ -481,14 +489,14 @@ function deleteBullets(PlayerObj) {
     for (let i = 0;i < PlayerObj.BulletObjs.length; i++) {
         if (PlayerObj.BulletObjs[i].x < 0 || PlayerObj.BulletObjs[i].x > maxWidth || PlayerObj.BulletObjs[i].y < 0 || PlayerObj.BulletObjs[i].y > maxHeight) {
             const container = document.getElementById("bulletContainer");
-            container.removeChild(PlayerObj.BulletObjs[i].bullet);
+            container.removeChild(PlayerObj.BulletObjs[i].bulletDiv);
             PlayerObj.BulletObjs.splice(i,1);
         }
     }
 }
 
 function checkFinish(PlayerObj) {
-    if (PlayerObj.coinsCollected === PlayerObj.totalCoins && PlayerObj.enemiesKilled === PlayerObj.totalEnemies) {
+    if (PlayerObj.coinsCollected === totalCoins && PlayerObj.enemiesKilled === totalEnemies) {
         window.location.href="win.html";
     }
 }
@@ -506,16 +514,19 @@ PlayerObj.findSquare(squareObjs);
 enemiesObjs=addInteractiveSquares(GridObj,squareObjs,enemiesObjs,Enemy);
 coinObjs=addInteractiveSquares(GridObj,squareObjs,coinObjs,Coin);
 
-PlayerObj.totalCoins = coinObjs.length;
-PlayerObj.totalEnemies = enemiesObjs.length;
+let totalCoins = coinObjs.length;
+let totalEnemies = enemiesObjs.length;
 PlayerObj.enemiesObjs=enemiesObjs;
-PlayerObj.showCollectCoin();
-PlayerObj.showKillEnemy();
+
+CoinText=new UIText(document.getElementById("coinCount"), "Coins collected: ", totalCoins);
+CoinText.update(0);
+EnemyText=new UIText(document.getElementById("killCount"), "Enemies killed: ", totalEnemies);
+EnemyText.update(0);
 
 GridObj.addWalls(squareObjs);
 
 var moveE=setInterval(function () {
-    moveEnemies(PlayerObj,squareObjs);
+    moveEnemies(squareObjs,enemiesObjs);
     },
     500);
 
