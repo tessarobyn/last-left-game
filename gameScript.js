@@ -54,8 +54,10 @@ function Grid() {
                         && squareObjs[start+(i+1)].color===this.emptyColor //right 1
                         && squareObjs[start-(i*this.c)].color===this.emptyColor //up
                         && squareObjs[start+(i*this.c)].color===this.emptyColor //down
-                        && squareObjs[start-(i*this.c)+(i+1)].color===this.emptyColor //up,right 1
-                        && squareObjs[start+(i*this.c)+(i+1)].color===this.emptyColor //down,right 1
+                        && squareObjs[(start-(i*this.c))+(i+1)].color===this.emptyColor //up,right 1
+                        && squareObjs[(start+(i*this.c))+(i+1)].color===this.emptyColor //down,right 1
+                        && squareObjs[(start-(i*this.c))-(i+1)].color===this.emptyColor //up,left 1
+                        && squareObjs[(start+(i*this.c))+(i+1)].color===this.emptyColor //down,left 1 
                         ) {
                             squareObjs[start+i].changeColor(this.wallColor);
                         }
@@ -76,8 +78,10 @@ function Grid() {
                         && squareObjs[start-(i+1)].color===this.emptyColor // left 1
                         && squareObjs[start-(i*this.c)].color===this.emptyColor //up
                         && squareObjs[start+(i*this.c)].color===this.emptyColor //down
-                        && squareObjs[start-(i*this.c)-(i+1)].color===this.emptyColor //up,left 1
-                        && squareObjs[start+(i*this.c)-(i+1)].color===this.emptyColor //down,left 1 
+                        && squareObjs[(start-(i*this.c))-(i+1)].color===this.emptyColor //up,left 1
+                        && squareObjs[(start+(i*this.c))-(i+1)].color===this.emptyColor //down,left 1 
+                        && squareObjs[(start-(i*this.c))+(i+1)].color===this.emptyColor //up,right 1
+                        && squareObjs[(start+(i*this.c))+(i+1)].color===this.emptyColor //down,right 1
                         ) {
                             squareObjs[start-i].changeColor(this.wallColor);
                         }
@@ -100,6 +104,8 @@ function Grid() {
                         && squareObjs[(start-(i*this.c))-1].color===this.emptyColor //left
                         && squareObjs[(start-((i+1)*this.c))+1].color===this.emptyColor //up, right
                         && squareObjs[(start-((i+1)*this.c))-1].color===this.emptyColor //up, left
+                        && squareObjs[(start+((i+1)*this.c))+1].color===this.emptyColor //down, right
+                        && squareObjs[(start+((i+1)*this.c))-1].color===this.emptyColor //down, left
                         ) {
                             squareObjs[start-(i*this.c)].changeColor(this.wallColor);
                         }
@@ -122,6 +128,8 @@ function Grid() {
                         && squareObjs[(start+(i*this.c))-1].color===this.emptyColor //left
                         && squareObjs[(start+((i+1)*this.c))+1].color===this.emptyColor //down, right
                         && squareObjs[(start+((i+1)*this.c))-1].color===this.emptyColor //down, left
+                        && squareObjs[(start-((i+1)*this.c))+1].color===this.emptyColor //up, right
+                        && squareObjs[(start-((i+1)*this.c))-1].color===this.emptyColor //up, left
                         ) {
                             squareObjs[start+(i*this.c)].changeColor(this.wallColor);
                         }
@@ -136,11 +144,6 @@ function Grid() {
             }
         }
 
-    }
-
-    this.floodCheck = function (squareObjs) {
-        let startx = 1;
-        let starty = 1;
     }
 }
 
@@ -165,6 +168,10 @@ function Player(GridObj) {
     this.x=Math.floor(GridObj.c/2);
     this.y=Math.floor(GridObj.r/2);
     this.color="#ff3366";
+    this.enemyColor="#00b4d8";
+    this.coinColor="#ffc857";
+    this.coinsCollected=-1;
+    this.totalCoins;
     this.divIndex;
     this.findSquare = function (squareObjs) {
         for (let i=0;i < squareObjs.length; i++) {
@@ -179,44 +186,62 @@ function Player(GridObj) {
     }
 
     this.moveRight = function (squareObjs) {
-        if (squareObjs[this.divIndex+1].color === "#26313b") {
+        if (squareObjs[this.divIndex+1].color === "#26313b" || squareObjs[this.divIndex+1].color === this.coinColor) {
             squareObjs[this.divIndex].changeColor("#26313b");
             this.divIndex+=1;
+            if (squareObjs[this.divIndex].color === this.coinColor) {
+                this.collectCoin();
+            }
             squareObjs[this.divIndex].changeColor(this.color);
         }
-        else if (squareObjs[this.divIndex+1].color === "#00b4d8") {
+        else if (squareObjs[this.divIndex+1].color === this.enemyColor) {
             this.kill();
         }
     }
     this.moveLeft = function (squareObjs) {
-        if (squareObjs[this.divIndex-1].color === "#26313b") {
+        if (squareObjs[this.divIndex-1].color === "#26313b" || squareObjs[this.divIndex-1].color === this.coinColor) {
             squareObjs[this.divIndex].changeColor("#26313b");
             this.divIndex-=1;
+            if (squareObjs[this.divIndex].color === this.coinColor) {
+                this.collectCoin(coinObjs.length);
+            }
             squareObjs[this.divIndex].changeColor(this.color);
         }
-        else if (squareObjs[this.divIndex-1].color === "#00b4d8") {
+        else if (squareObjs[this.divIndex-1].color === this.enemyColor) {
             this.kill();
         }
     }
     this.moveUp = function (squareObjs) {
-        if (squareObjs[this.divIndex-GridObj.c].color === "#26313b") {
+        if (squareObjs[this.divIndex-GridObj.c].color === "#26313b" || squareObjs[this.divIndex-GridObj.c].color === this.coinColor) {
             squareObjs[this.divIndex].changeColor("#26313b");
             this.divIndex-=GridObj.c;
+            if (squareObjs[this.divIndex].color === this.coinColor) {
+                this.collectCoin(coinObjs.length);
+            }
             squareObjs[this.divIndex].changeColor(this.color);
         }
-        else if (squareObjs[this.divIndex-GridObj.c].color === "#00b4d8") {
+        else if (squareObjs[this.divIndex-GridObj.c].color === this.enemyColor) {
             this.kill();
         }
     }
     this.moveDown = function (squareObjs) {
-        if (squareObjs[this.divIndex+GridObj.c].color === "#26313b") {
+        if (squareObjs[this.divIndex+GridObj.c].color === "#26313b" || squareObjs[this.divIndex+GridObj.c].color === this.coinColor) {
             squareObjs[this.divIndex].changeColor("#26313b");
             this.divIndex+=GridObj.c;
+            if (squareObjs[this.divIndex].color === this.coinColor) {
+                this.collectCoin(coinObjs.length);
+            }
             squareObjs[this.divIndex].changeColor(this.color);
         }
-        else if (squareObjs[this.divIndex+GridObj.c].color === "#00b4d8") {
+        else if (squareObjs[this.divIndex+GridObj.c].color === this.enemyColor) {
             this.kill();
         }
+    }
+
+    this.collectCoin = function() {
+        const coinCount=document.getElementById("coinCount");
+        this.coinsCollected+=1
+        coinCount.innerText="Coins collected: "+String(this.coinsCollected)+"/"+String(this.totalCoins);
     }
 }
 
@@ -353,6 +378,9 @@ PlayerObj.findSquare(squareObjs);
 
 enemiesObjs=addInteractiveSquares(GridObj,squareObjs,enemiesObjs,Enemy);
 coinObjs=addInteractiveSquares(GridObj,squareObjs,coinObjs,Coin);
+
+PlayerObj.totalCoins = coinObjs.length;
+PlayerObj.collectCoin();
 
 GridObj.addWalls(squareObjs);
 
