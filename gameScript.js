@@ -36,111 +36,58 @@ function Grid() {
 
     this.addWalls = function (squareObjs) {
         const numOfSquares=this.c*this.r;
-        const totalWallSquares=Math.round(numOfSquares/5);
+        const areaToPerimeter = numOfSquares/(this.c*2+this.r*2);
+        console.log(areaToPerimeter);
+        if (areaToPerimeter < 7) {
+            ratio=9-(areaToPerimeter/2);
+        }
+        else {
+            ratio=10-(areaToPerimeter/2);
+        }
+        console.log(ratio);
+        const totalWallSquares=Math.round(numOfSquares/ratio);
         const num1=Math.round(numOfSquares/100);
-        const num2=Math.round(numOfSquares/50);
+        const num2=Math.round(numOfSquares/20);
         let addedWallSquares=0;
         while (addedWallSquares < totalWallSquares) {
-            let wallLength=randomInt(num1,num2);
-            addedWallSquares+=wallLength;
-            let wallDirection=randomInt(1,4);
-            let start=randomInt(0,numOfSquares-1)
-            // 1: right, 2: left, 3: up, 4: down
+            let length =randomInt(num1,num2);
+            let startPos = randomInt(this.c+2,numOfSquares-this.c-2);
+            let generatingWall = true;
+            let possMoves = [-this.c,-1,+1,this.c,this.c+1,-this.c+1,-this.c-1,this.c-1];
+            for (let i = 0; i < length; i++) {
+                    if (generatingWall) {
+                        let moveNum=randomInt(0,3);
+                        startPos+=possMoves[moveNum];
+                        empty=true;
+                        try {
+                            if (squareObjs[startPos].color === this.emptyColor) {
+                                for (let j = 0; j < possMoves.length; j++) {
+                                    if (j !== moveNum) {
+                                        if (squareObjs[startPos+possMoves[j]].color !== this.emptyColor) {
+                                            empty=false;
+                                        }
+                                    }
+                                }
+                            }
+                            else {
+                                empty=false;
+                            }
+        
+                            if (empty) {
+                                squareObjs[startPos].changeColor(this.wallColor);
+                                addedWallSquares+=1;
+                            }
+                            else {
+                                generatingWall=false;
+                            }
+                        }
+                        catch {
+                           generatingWall=false;
+                        }
+                    }
+                        
 
-            if (wallDirection === 1) {
-                for (let i=0; i < wallLength; i++) {
-                    try {
-                        if (squareObjs[start+i].color===this.emptyColor 
-                        && squareObjs[start+(i+1)].color===this.emptyColor //right 1
-                        && squareObjs[start-(i*this.c)].color===this.emptyColor //up
-                        && squareObjs[start+(i*this.c)].color===this.emptyColor //down
-                        && squareObjs[(start-(i*this.c))+(i+1)].color===this.emptyColor //up,right 1
-                        && squareObjs[(start+(i*this.c))+(i+1)].color===this.emptyColor //down,right 1
-                        && squareObjs[(start-(i*this.c))-(i+1)].color===this.emptyColor //up,left 1
-                        && squareObjs[(start+(i*this.c))+(i+1)].color===this.emptyColor //down,left 1 
-                        ) {
-                            squareObjs[start+i].changeColor(this.wallColor);
-                        }
-                        else {
-                            addedWallSquares-=1;
-                        }
-                    }
-                    catch {
-                        addedWallSquares-=1;
-                    }
-                }
-            }
-
-            if (wallDirection === 2) {
-                for (let i=0; i < wallLength; i++) {
-                    try {
-                        if (squareObjs[start-i].color===this.emptyColor 
-                        && squareObjs[start-(i+1)].color===this.emptyColor // left 1
-                        && squareObjs[start-(i*this.c)].color===this.emptyColor //up
-                        && squareObjs[start+(i*this.c)].color===this.emptyColor //down
-                        && squareObjs[(start-(i*this.c))-(i+1)].color===this.emptyColor //up,left 1
-                        && squareObjs[(start+(i*this.c))-(i+1)].color===this.emptyColor //down,left 1 
-                        && squareObjs[(start-(i*this.c))+(i+1)].color===this.emptyColor //up,right 1
-                        && squareObjs[(start+(i*this.c))+(i+1)].color===this.emptyColor //down,right 1
-                        ) {
-                            squareObjs[start-i].changeColor(this.wallColor);
-                        }
-                        else {
-                            addedWallSquares-=1;
-                        }
-                    }
-                    catch {
-                        addedWallSquares-=1;
-                    }
-                }
-            }
-
-            if (wallDirection === 3) {
-                for (let i=0; i < wallLength; i++) {
-                    try {
-                        if (squareObjs[start-(i*this.c)].color===this.emptyColor 
-                        && squareObjs[start-((i+1)*this.c)].color===this.emptyColor
-                        && squareObjs[(start-(i*this.c))+1].color===this.emptyColor //right
-                        && squareObjs[(start-(i*this.c))-1].color===this.emptyColor //left
-                        && squareObjs[(start-((i+1)*this.c))+1].color===this.emptyColor //up, right
-                        && squareObjs[(start-((i+1)*this.c))-1].color===this.emptyColor //up, left
-                        && squareObjs[(start+((i+1)*this.c))+1].color===this.emptyColor //down, right
-                        && squareObjs[(start+((i+1)*this.c))-1].color===this.emptyColor //down, left
-                        ) {
-                            squareObjs[start-(i*this.c)].changeColor(this.wallColor);
-                        }
-                        else {
-                            addedWallSquares-=1;
-                        }
-                    }
-                    catch {
-                        addedWallSquares-=1;
-                    }
-                }
-            }
-
-            if (wallDirection === 4) {
-                for (let i=0; i < wallLength; i++) {
-                    try {
-                        if (squareObjs[start+(i*this.c)].color===this.emptyColor 
-                        && squareObjs[start+((i+1)*this.c)].color===this.emptyColor
-                        && squareObjs[(start+(i*this.c))+1].color===this.emptyColor //right
-                        && squareObjs[(start+(i*this.c))-1].color===this.emptyColor //left
-                        && squareObjs[(start+((i+1)*this.c))+1].color===this.emptyColor //down, right
-                        && squareObjs[(start+((i+1)*this.c))-1].color===this.emptyColor //down, left
-                        && squareObjs[(start-((i+1)*this.c))+1].color===this.emptyColor //up, right
-                        && squareObjs[(start-((i+1)*this.c))-1].color===this.emptyColor //up, left
-                        ) {
-                            squareObjs[start+(i*this.c)].changeColor(this.wallColor);
-                        }
-                        else {
-                            addedWallSquares-=1;
-                        }
-                    }
-                    catch {
-                        addedWallSquares-=1;
-                    }
-                }
+                
             }
         }
 
