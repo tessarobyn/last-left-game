@@ -36,9 +36,16 @@ function Grid() {
 
     this.addWalls = function (squareObjs) {
         const numOfSquares=this.c*this.r;
-        const areaToPerimeter = (this.c*2+this.r*2)/numOfSquares;
-        console.log(areaToPerimeter)
-        const totalWallSquares=Math.round(numOfSquares/(8-(1-areaToPerimeter)));
+        const areaToPerimeter = numOfSquares/(this.c*2+this.r*2);
+        console.log(areaToPerimeter);
+        if (areaToPerimeter < 7) {
+            ratio=9-(areaToPerimeter/2);
+        }
+        else {
+            ratio=10-(areaToPerimeter/2);
+        }
+        console.log(ratio);
+        const totalWallSquares=Math.round(numOfSquares/ratio);
         const num1=Math.round(numOfSquares/100);
         const num2=Math.round(numOfSquares/20);
         let addedWallSquares=0;
@@ -46,7 +53,7 @@ function Grid() {
             let length =randomInt(num1,num2);
             let startPos = randomInt(this.c+2,numOfSquares-this.c-2);
             let generatingWall = true;
-            let possMoves = [-this.c,-1,+1,this.c,this.c+1,-this.c+1,-this.c-1,this.c-1]
+            let possMoves = [-this.c,-1,+1,this.c,this.c+1,-this.c+1,-this.c-1,this.c-1];
             for (let i = 0; i < length; i++) {
                     if (generatingWall) {
                         let moveNum=randomInt(0,3);
