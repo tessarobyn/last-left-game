@@ -144,14 +144,19 @@ class Enemy extends SpecialSquares {
 
   move(squareObjs) {
     const move = randomInt(1, 4);
-    if (move === 1) {
-      this.moveRight(squareObjs);
-    } else if (move === 2) {
-      this.moveLeft(squareObjs);
-    } else if (move === 3) {
-      this.moveUp(squareObjs);
-    } else if (move === 4) {
-      this.moveDown(squareObjs);
+    switch (move) {
+      case 1:
+        this.moveRight(squareObjs);
+        break;
+      case 2:
+        this.moveLeft(squareObjs);
+        break;
+      case 3:
+        this.moveUp(squareObjs);
+        break;
+      case 4:
+        this.moveDown(squareObjs);
+        break;
     }
   }
 }
@@ -410,16 +415,22 @@ class UIText {
 }
 
 function checkKey(e) {
-  if (e.code == "KeyW") {
-    PlayerObj.moveUp(squareObjs);
-  } else if (e.code == "KeyA") {
-    PlayerObj.moveLeft(squareObjs);
-  } else if (e.code == "KeyS") {
-    PlayerObj.moveDown(squareObjs);
-  } else if (e.code == "KeyD") {
-    PlayerObj.moveRight(squareObjs);
-  } else if (e.code == "Space") {
-    PlayerObj.shoot();
+  switch (e.code) {
+    case "KeyW":
+      PlayerObj.moveUp(squareObjs);
+      break;
+    case "KeyA":
+      PlayerObj.moveLeft(squareObjs);
+      break;
+    case "KeyS":
+      PlayerObj.moveDown(squareObjs);
+      break;
+    case "KeyD":
+      PlayerObj.moveRight(squareObjs);
+      break;
+    case "Space":
+      PlayerObj.shoot();
+      break;
   }
 }
 
