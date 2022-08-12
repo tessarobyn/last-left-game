@@ -2,30 +2,191 @@ function randomInt(num1, num2) {
   return Math.floor(Math.random() * (num2 - num1 + 1)) + num1;
 }
 
-function Grid() {
-  if (!(this instanceof Grid)) {
-    return new Grid();
+class Bullet {
+  constructor(direction, divIndex, c, r) {
+    this.x = divIndex % c;
+    this.y = Math.floor(divIndex / c);
+    this.direction = direction;
+    this.length = 1;
+    this.width = 0.5;
+    this.bulletDiv;
   }
-  (this.squareSize = 30),
-    (this.gridContainer = document.getElementById("grid")),
-    (this.width = this.gridContainer.offsetWidth),
-    (this.height = this.gridContainer.offsetHeight),
-    (this.c = Math.floor(this.width / this.squareSize)),
-    (this.r = Math.floor(this.height / this.squareSize)),
-    (this.emptyColor = "#26313b");
-  this.wallColor = "#0e171d";
 
-  this.setup = function () {
+  add(c, r) {
+    const bullet = document.createElement("div");
+    bullet.classList.add("bullet");
+    if (this.direction === "up" || this.direction === "down") {
+      bullet.style.width = this.width + "vh";
+      bullet.style.height = this.length + "vh";
+    } else {
+      bullet.style.width = this.length + "vh";
+      bullet.style.height = this.width + "vh";
+    }
+    const body = document.getElementsByTagName("body")[0];
+    this.y = (body.offsetHeight / r) * this.y + body.offsetHeight / r / 2;
+    this.x = (body.offsetWidth / c) * this.x + body.offsetWidth / c / 2;
+    bullet.style.top = this.y + "px";
+    bullet.style.left = this.x + "px";
+    const container = document.getElementById("bulletContainer");
+    this.bulletDiv = bullet;
+    container.appendChild(bullet);
+  }
+
+  checkKill(squareObjs, c, r, enemiesObjs) {
+    const body = document.getElementsByTagName("body")[0];
+    const xSquare = Math.floor(this.x / (body.offsetWidth / c));
+    const ySquare = Math.floor(this.y / (body.offsetHeight / r));
+    let index = ySquare * c + xSquare;
+    for (let i = 0; i < enemiesObjs.length; i++) {
+      if (enemiesObjs[i].divIndex === index) {
+        enemiesObjs.splice(i, 1);
+        squareObjs[index].changeColor("#26313b");
+        PlayerObj.killEnemy();
+        for (let i = 0; i < PlayerObj.BulletObjs.length; i++) {
+          if (
+            PlayerObj.BulletObjs[i].x === this.x &&
+            PlayerObj.BulletObjs[i].y === this.y
+          ) {
+            const container = document.getElementById("bulletContainer");
+            container.removeChild(this.bulletDiv);
+            PlayerObj.BulletObjs.splice(i, 1);
+          }
+        }
+      }
+    }
+  }
+
+  move() {
+    if (this.direction === "left") {
+      this.x -= 3;
+    }
+    if (this.direction === "right") {
+      this.x += 3;
+    }
+    if (this.direction === "up") {
+      this.y -= 3;
+    }
+    if (this.direction === "down") {
+      this.y += 3;
+    }
+
+    this.bulletDiv.style.top = this.y + "px";
+    this.bulletDiv.style.left = this.x + "px";
+  }
+}
+
+class SpecialSquares {
+  findSquare(squareObjs) {
+    let added = false;
+    while (!added) {
+      this.x = randomInt(1, this.GridObj.c - 2);
+      this.y = randomInt(1, this.GridObj.r - 2);
+      let i = this.y * this.GridObj.c + this.x;
+      if (squareObjs[i].color === "#26313b") {
+        squareObjs[i].changeColor(this.color);
+        this.divIndex = i;
+        added = true;
+      }
+    }
+  }
+}
+
+class Enemy extends SpecialSquares {
+  constructor(GridObj, PlayerObj) {
+    super();
+    this.color = "#00b4d8";
+    this.divIndex;
+    this.x;
+    this.y;
+    this.GridObj = GridObj;
+    this.PlayerObj = PlayerObj;
+  }
+  moveRight(squareObjs) {
+    if (squareObjs[this.divIndex + 1].color === "#26313b") {
+      squareObjs[this.divIndex].changeColor("#26313b");
+      this.divIndex += 1;
+      squareObjs[this.divIndex].changeColor(this.color);
+    } else if (squareObjs[this.divIndex + 1].color === this.PlayerObj.color) {
+      this.PlayerObj.kill();
+    }
+  }
+  moveLeft(squareObjs) {
+    if (squareObjs[this.divIndex - 1].color === "#26313b") {
+      squareObjs[this.divIndex].changeColor("#26313b");
+      this.divIndex -= 1;
+      squareObjs[this.divIndex].changeColor(this.color);
+    } else if (squareObjs[this.divIndex - 1].color === this.PlayerObj.color) {
+      this.PlayerObj.kill();
+    }
+  }
+  moveUp(squareObjs) {
+    if (squareObjs[this.divIndex - this.GridObj.c].color === "#26313b") {
+      squareObjs[this.divIndex].changeColor("#26313b");
+      this.divIndex -= this.GridObj.c;
+      squareObjs[this.divIndex].changeColor(this.color);
+    } else if (
+      squareObjs[this.divIndex - this.GridObj.c].color === this.PlayerObj.color
+    ) {
+      this.PlayerObj.kill();
+    }
+  }
+  moveDown(squareObjs) {
+    if (squareObjs[this.divIndex + this.GridObj.c].color === "#26313b") {
+      squareObjs[this.divIndex].changeColor("#26313b");
+      this.divIndex += this.GridObj.c;
+      squareObjs[this.divIndex].changeColor(this.color);
+    } else if (
+      squareObjs[this.divIndex + this.GridObj.c].color === this.PlayerObj.color
+    ) {
+      this.PlayerObj.kill();
+    }
+  }
+
+  move(squareObjs) {
+    let move = randomInt(1, 4);
+    if (move === 1) {
+      this.moveRight(squareObjs);
+    } else if (move === 2) {
+      this.moveLeft(squareObjs);
+    } else if (move === 3) {
+      this.moveUp(squareObjs);
+    } else if (move === 4) {
+      this.moveDown(squareObjs);
+    }
+  }
+}
+
+class Coin extends SpecialSquares {
+  constructor(GridObj) {
+    super();
+    this.color = "#ffc857";
+    this.GridObj = GridObj;
+  }
+}
+
+class Grid {
+  constructor() {
+    (this.squareSize = 30),
+      (this.gridContainer = document.getElementById("grid")),
+      (this.width = this.gridContainer.offsetWidth),
+      (this.height = this.gridContainer.offsetHeight),
+      (this.c = Math.floor(this.width / this.squareSize)),
+      (this.r = Math.floor(this.height / this.squareSize)),
+      (this.emptyColor = "#26313b");
+    this.wallColor = "#0e171d";
+  }
+
+  setup() {
     this.gridContainer.style.gridTemplateColumns =
       "repeat(" + this.c + ", 1fr)";
     this.gridContainer.style.gridTemplateRows = "repeat(" + this.r + ", 1fr)";
-  };
+  }
 
-  this.create = function (squareObjs) {
+  create(squareObjs) {
     for (let i = 0; i < this.r; i++) {
       for (let j = 0; j < this.c; j++) {
         let div = document.createElement("div");
-        let SquareObj = Square(div, j, i);
+        let SquareObj = new Square(div, j, i);
         if (
           SquareObj.x === 0 ||
           SquareObj.x === this.c - 1 ||
@@ -38,18 +199,18 @@ function Grid() {
         this.gridContainer.appendChild(div);
       }
     }
-  };
+  }
 
-  this.addWalls = function (squareObjs) {
+  addWalls(squareObjs) {
     const numOfSquares = this.c * this.r;
     const areaToPerimeter = numOfSquares / (this.c * 2 + this.r * 2);
     console.log(areaToPerimeter);
+    let ratio;
     if (areaToPerimeter < 7) {
       ratio = 9 - areaToPerimeter / 2;
     } else {
       ratio = 10 - areaToPerimeter / 2;
     }
-    console.log(ratio);
     const totalWallSquares = Math.round(numOfSquares / ratio);
     const num1 = Math.round(numOfSquares / 100);
     const num2 = Math.round(numOfSquares / 20);
@@ -72,7 +233,7 @@ function Grid() {
         if (generatingWall) {
           let moveNum = randomInt(0, 3);
           startPos += possMoves[moveNum];
-          empty = true;
+          let empty = true;
           try {
             if (squareObjs[startPos].color === this.emptyColor) {
               for (let j = 0; j < possMoves.length; j++) {
@@ -101,137 +262,37 @@ function Grid() {
         }
       }
     }
-  };
+  }
 }
 
-function Square(div, x, y) {
-  if (!(this instanceof Square)) {
-    return new Square(div, x, y);
+class Player {
+  constructor(GridObj, CoinText) {
+    this.x = Math.floor(GridObj.c / 2);
+    this.y = Math.floor(GridObj.r / 2);
+    this.color = "#ff3366";
+    this.enemyColor = "#00b4d8";
+    this.coinColor = "#ffc857";
+    this.coinsCollected = 0;
+    this.enemiesKilled = 0;
+    this.divIndex;
+    this.direction = "up";
+    this.BulletObjs = [];
+    this.GridObj = GridObj;
   }
-  (this.div = div),
-    (this.color = "#26313b"),
-    (this.x = x),
-    (this.y = y),
-    (this.changeColor = function (color) {
-      div.style.backgroundColor = color;
-      this.color = color;
-    });
-}
 
-function Bullet(direction, divIndex, c, r) {
-  if (!(this instanceof Bullet)) {
-    return new Bullet();
-  }
-  this.x = divIndex % c;
-  this.y = Math.floor(divIndex / c);
-  this.direction = direction;
-  this.length = 1;
-  this.width = 0.5;
-  this.bulletDiv;
-
-  this.add = function (c, r) {
-    const bullet = document.createElement("div");
-    bullet.classList.add("bullet");
-    if (this.direction === "up" || this.direction === "down") {
-      bullet.style.width = this.width + "vh";
-      bullet.style.height = this.length + "vh";
-    } else {
-      bullet.style.width = this.length + "vh";
-      bullet.style.height = this.width + "vh";
-    }
-    const body = document.getElementsByTagName("body")[0];
-    this.y = (body.offsetHeight / r) * this.y + body.offsetHeight / r / 2;
-    this.x = (body.offsetWidth / c) * this.x + body.offsetWidth / c / 2;
-    bullet.style.top = this.y + "px";
-    bullet.style.left = this.x + "px";
-    const container = document.getElementById("bulletContainer");
-    this.bulletDiv = bullet;
-    container.appendChild(bullet);
-  };
-
-  this.checkKill = function (squareObjs, c, r, enemiesObjs) {
-    const body = document.getElementsByTagName("body")[0];
-    const xSquare = Math.floor(this.x / (body.offsetWidth / c));
-    const ySquare = Math.floor(this.y / (body.offsetHeight / r));
-    let index = ySquare * c + xSquare;
-    for (let i = 0; i < enemiesObjs.length; i++) {
-      if (enemiesObjs[i].divIndex === index) {
-        enemiesObjs.splice(i, 1);
-        squareObjs[index].changeColor("#26313b");
-        PlayerObj.killEnemy();
-        for (let i = 0; i < PlayerObj.BulletObjs.length; i++) {
-          if (
-            PlayerObj.BulletObjs[i].x === this.x &&
-            PlayerObj.BulletObjs[i].y === this.y
-          ) {
-            const container = document.getElementById("bulletContainer");
-            container.removeChild(this.bulletDiv);
-            PlayerObj.BulletObjs.splice(i, 1);
-          }
-        }
-      }
-    }
-  };
-
-  this.move = function () {
-    if (this.direction === "left") {
-      this.x -= 3;
-    }
-    if (this.direction === "right") {
-      this.x += 3;
-    }
-    if (this.direction === "up") {
-      this.y -= 3;
-    }
-    if (this.direction === "down") {
-      this.y += 3;
-    }
-
-    this.bulletDiv.style.top = this.y + "px";
-    this.bulletDiv.style.left = this.x + "px";
-  };
-}
-
-function UIText(element, text, total) {
-  if (!(this instanceof UIText)) {
-    return new UIText(element, text, total);
-  }
-  (this.element = element),
-    (this.text = text),
-    (this.total = total),
-    (this.update = function (num) {
-      this.element.innerText =
-        this.text + String(num) + "/" + String(this.total);
-    });
-}
-
-function Player(GridObj) {
-  if (!(this instanceof Player)) {
-    return new Player(GridObj);
-  }
-  this.x = Math.floor(GridObj.c / 2);
-  this.y = Math.floor(GridObj.r / 2);
-  this.color = "#ff3366";
-  this.enemyColor = "#00b4d8";
-  this.coinColor = "#ffc857";
-  this.coinsCollected = 0;
-  this.enemiesKilled = 0;
-  this.divIndex;
-  this.direction = "up";
-  this.BulletObjs = [];
-  this.findSquare = function (squareObjs) {
+  findSquare(squareObjs) {
     for (let i = 0; i < squareObjs.length; i++) {
       if (squareObjs[i].y === this.y && squareObjs[i].x === this.x) {
         squareObjs[i].changeColor(this.color);
         this.divIndex = i;
       }
     }
-  };
-  this.kill = function () {
+  }
+  kill() {
     window.location.href = "gameOver.html";
-  };
+  }
 
-  this.moveRight = function (squareObjs) {
+  moveRight(squareObjs) {
     if (
       squareObjs[this.divIndex + 1].color === "#26313b" ||
       squareObjs[this.divIndex + 1].color === this.coinColor
@@ -246,8 +307,8 @@ function Player(GridObj) {
     } else if (squareObjs[this.divIndex + 1].color === this.enemyColor) {
       this.kill();
     }
-  };
-  this.moveLeft = function (squareObjs) {
+  }
+  moveLeft(squareObjs) {
     if (
       squareObjs[this.divIndex - 1].color === "#26313b" ||
       squareObjs[this.divIndex - 1].color === this.coinColor
@@ -262,151 +323,90 @@ function Player(GridObj) {
     } else if (squareObjs[this.divIndex - 1].color === this.enemyColor) {
       this.kill();
     }
-  };
-  this.moveUp = function (squareObjs) {
+  }
+  moveUp(squareObjs) {
     if (
-      squareObjs[this.divIndex - GridObj.c].color === "#26313b" ||
-      squareObjs[this.divIndex - GridObj.c].color === this.coinColor
+      squareObjs[this.divIndex - this.GridObj.c].color === "#26313b" ||
+      squareObjs[this.divIndex - this.GridObj.c].color === this.coinColor
     ) {
       squareObjs[this.divIndex].changeColor("#26313b");
-      this.divIndex -= GridObj.c;
+      this.divIndex -= this.GridObj.c;
       if (squareObjs[this.divIndex].color === this.coinColor) {
         this.collectCoin();
       }
       squareObjs[this.divIndex].changeColor(this.color);
       this.direction = "up";
     } else if (
-      squareObjs[this.divIndex - GridObj.c].color === this.enemyColor
+      squareObjs[this.divIndex - this.GridObj.c].color === this.enemyColor
     ) {
       this.kill();
     }
-  };
-  this.moveDown = function (squareObjs) {
+  }
+  moveDown(squareObjs) {
     if (
-      squareObjs[this.divIndex + GridObj.c].color === "#26313b" ||
-      squareObjs[this.divIndex + GridObj.c].color === this.coinColor
+      squareObjs[this.divIndex + this.GridObj.c].color === "#26313b" ||
+      squareObjs[this.divIndex + this.GridObj.c].color === this.coinColor
     ) {
       squareObjs[this.divIndex].changeColor("#26313b");
-      this.divIndex += GridObj.c;
+      this.divIndex += this.GridObj.c;
       if (squareObjs[this.divIndex].color === this.coinColor) {
         this.collectCoin();
       }
       squareObjs[this.divIndex].changeColor(this.color);
       this.direction = "down";
     } else if (
-      squareObjs[this.divIndex + GridObj.c].color === this.enemyColor
+      squareObjs[this.divIndex + this.GridObj.c].color === this.enemyColor
     ) {
       this.kill();
     }
-  };
+  }
 
-  this.collectCoin = function () {
+  collectCoin() {
     this.coinsCollected += 1;
     CoinText.update(this.coinsCollected);
     checkFinish(this);
-  };
+  }
 
-  this.killEnemy = function () {
+  killEnemy() {
     this.enemiesKilled += 1;
     EnemyText.update(this.enemiesKilled);
     checkFinish(this);
-  };
+  }
 
-  this.shoot = function () {
+  shoot() {
     var BulletObj = new Bullet(
       this.direction,
       this.divIndex,
-      GridObj.c,
-      GridObj.r
+      this.GridObj.c,
+      this.GridObj.r
     );
-    BulletObj.add(GridObj.c, GridObj.r);
+    BulletObj.add(this.GridObj.c, this.GridObj.r);
     this.BulletObjs.push(BulletObj);
-  };
+  }
 }
 
-function Enemy(GridObj) {
-  if (!(this instanceof Enemy)) {
-    return new Enemy(GridObj);
+class Square {
+  constructor(div, x, y) {
+    this.div = div;
+    this.color = "#26313b";
+    this.x = x;
+    this.y = y;
   }
-  this.color = "#00b4d8";
-  this.divIndex;
-  this.x;
-  this.y;
-
-  this.moveRight = function (squareObjs) {
-    if (squareObjs[this.divIndex + 1].color === "#26313b") {
-      squareObjs[this.divIndex].changeColor("#26313b");
-      this.divIndex += 1;
-      squareObjs[this.divIndex].changeColor(this.color);
-    } else if (squareObjs[this.divIndex + 1].color === PlayerObj.color) {
-      PlayerObj.kill();
-    }
-  };
-  this.moveLeft = function (squareObjs) {
-    if (squareObjs[this.divIndex - 1].color === "#26313b") {
-      squareObjs[this.divIndex].changeColor("#26313b");
-      this.divIndex -= 1;
-      squareObjs[this.divIndex].changeColor(this.color);
-    } else if (squareObjs[this.divIndex - 1].color === PlayerObj.color) {
-      PlayerObj.kill();
-    }
-  };
-  this.moveUp = function (squareObjs) {
-    if (squareObjs[this.divIndex - GridObj.c].color === "#26313b") {
-      squareObjs[this.divIndex].changeColor("#26313b");
-      this.divIndex -= GridObj.c;
-      squareObjs[this.divIndex].changeColor(this.color);
-    } else if (
-      squareObjs[this.divIndex - GridObj.c].color === PlayerObj.color
-    ) {
-      PlayerObj.kill();
-    }
-  };
-  this.moveDown = function (squareObjs) {
-    if (squareObjs[this.divIndex + GridObj.c].color === "#26313b") {
-      squareObjs[this.divIndex].changeColor("#26313b");
-      this.divIndex += GridObj.c;
-      squareObjs[this.divIndex].changeColor(this.color);
-    } else if (
-      squareObjs[this.divIndex + GridObj.c].color === PlayerObj.color
-    ) {
-      PlayerObj.kill();
-    }
-  };
-
-  this.move = function (squareObjs) {
-    let move = randomInt(1, 4);
-    if (move === 1) {
-      this.moveRight(squareObjs);
-    } else if (move === 2) {
-      this.moveLeft(squareObjs);
-    } else if (move === 3) {
-      this.moveUp(squareObjs);
-    } else if (move === 4) {
-      this.moveDown(squareObjs);
-    }
-  };
+  changeColor(color) {
+    this.div.style.backgroundColor = color;
+    this.color = color;
+  }
 }
 
-Enemy.prototype.findSquare = function (squareObjs) {
-  added = false;
-  while (!added) {
-    this.x = randomInt(1, GridObj.c - 2);
-    this.y = randomInt(1, GridObj.r - 2);
-    let i = this.y * GridObj.c + this.x;
-    if (squareObjs[i].color === "#26313b") {
-      squareObjs[i].changeColor(this.color);
-      this.divIndex = i;
-      added = true;
-    }
+class UIText {
+  constructor(element, text, total) {
+    this.element = element;
+    this.text = text;
+    this.total = total;
   }
-};
-
-function Coin(GridObj) {
-  if (!(this instanceof Coin)) {
-    return new Coin(GridObj);
+  update(num) {
+    this.element.innerText = this.text + String(num) + "/" + String(this.total);
   }
-  this.color = "#ffc857";
 }
 
 function checkKey(e) {
@@ -426,11 +426,13 @@ function checkKey(e) {
 function addInteractiveSquares(GridObj, squareObjs, interactiveObjs, ObjType) {
   const numOfSquares = GridObj.r * GridObj.c;
   const num = Math.round(numOfSquares / 75);
+  let Obj;
   for (let i = 0; i < num; i++) {
     if (ObjType === Coin) {
-      Coin.prototype = Object.create(Enemy.prototype);
+      Obj = new Coin(GridObj, PlayerObj);
+    } else if (ObjType === Enemy) {
+      Obj = new Enemy(GridObj, PlayerObj);
     }
-    var Obj = new ObjType(GridObj);
     Obj.findSquare(squareObjs);
     interactiveObjs.push(Obj);
   }
@@ -489,7 +491,7 @@ var GridObj = new Grid();
 GridObj.setup();
 GridObj.create(squareObjs);
 
-var PlayerObj = new Player(GridObj);
+const PlayerObj = new Player(GridObj);
 PlayerObj.findSquare(squareObjs);
 
 enemiesObjs = addInteractiveSquares(GridObj, squareObjs, enemiesObjs, Enemy);
@@ -498,13 +500,13 @@ coinObjs = addInteractiveSquares(GridObj, squareObjs, coinObjs, Coin);
 let totalCoins = coinObjs.length;
 let totalEnemies = enemiesObjs.length;
 
-CoinText = new UIText(
+const CoinText = new UIText(
   document.getElementById("coinCount"),
   "Coins collected: ",
   totalCoins
 );
 CoinText.update(0);
-EnemyText = new UIText(
+const EnemyText = new UIText(
   document.getElementById("killCount"),
   "Enemies killed: ",
   totalEnemies
@@ -513,15 +515,15 @@ EnemyText.update(0);
 
 GridObj.addWalls(squareObjs);
 
-var moveE = setInterval(function () {
+const moveE = setInterval(function () {
   moveEnemies(squareObjs, enemiesObjs);
 }, 500);
 
-var moveB = setInterval(function () {
+const moveB = setInterval(function () {
   moveBullets(PlayerObj, squareObjs, GridObj);
 }, 5);
 
-var deleteB = setInterval(function () {
+const deleteB = setInterval(function () {
   deleteBullets(PlayerObj);
 }, 5);
 
