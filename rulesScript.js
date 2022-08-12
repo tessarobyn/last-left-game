@@ -1,8 +1,8 @@
 function backHome() {
-    window.location.href="index.html";
+  window.location.href = "index.html";
 }
 
 const homeButton = document.getElementById("home");
 homeButton.addEventListener("click", () => {
-    backHome();
-})
+  backHome();
+});
