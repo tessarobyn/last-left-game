@@ -36,7 +36,7 @@ class Bullet {
     const body = document.getElementsByTagName("body")[0];
     const xSquare = Math.floor(this.x / (body.offsetWidth / c));
     const ySquare = Math.floor(this.y / (body.offsetHeight / r));
-    let index = ySquare * c + xSquare;
+    const index = ySquare * c + xSquare;
     for (let i = 0; i < enemiesObjs.length; i++) {
       if (enemiesObjs[i].divIndex === index) {
         enemiesObjs.splice(i, 1);
@@ -81,7 +81,7 @@ class SpecialSquares {
     while (!added) {
       this.x = randomInt(1, this.GridObj.c - 2);
       this.y = randomInt(1, this.GridObj.r - 2);
-      let i = this.y * this.GridObj.c + this.x;
+      const i = this.y * this.GridObj.c + this.x;
       if (squareObjs[i].color === "#26313b") {
         squareObjs[i].changeColor(this.color);
         this.divIndex = i;
@@ -143,7 +143,7 @@ class Enemy extends SpecialSquares {
   }
 
   move(squareObjs) {
-    let move = randomInt(1, 4);
+    const move = randomInt(1, 4);
     if (move === 1) {
       this.moveRight(squareObjs);
     } else if (move === 2) {
@@ -185,8 +185,8 @@ class Grid {
   create(squareObjs) {
     for (let i = 0; i < this.r; i++) {
       for (let j = 0; j < this.c; j++) {
-        let div = document.createElement("div");
-        let SquareObj = new Square(div, j, i);
+        const div = document.createElement("div");
+        const SquareObj = new Square(div, j, i);
         if (
           SquareObj.x === 0 ||
           SquareObj.x === this.c - 1 ||
@@ -204,7 +204,6 @@ class Grid {
   addWalls(squareObjs) {
     const numOfSquares = this.c * this.r;
     const areaToPerimeter = numOfSquares / (this.c * 2 + this.r * 2);
-    console.log(areaToPerimeter);
     let ratio;
     if (areaToPerimeter < 7) {
       ratio = 9 - areaToPerimeter / 2;
@@ -215,23 +214,24 @@ class Grid {
     const num1 = Math.round(numOfSquares / 100);
     const num2 = Math.round(numOfSquares / 20);
     let addedWallSquares = 0;
+    const possMoves = [
+      -this.c,
+      -1,
+      +1,
+      this.c,
+      this.c + 1,
+      -this.c + 1,
+      -this.c - 1,
+      this.c - 1,
+    ];
     while (addedWallSquares < totalWallSquares) {
-      let length = randomInt(num1, num2);
+      const length = randomInt(num1, num2);
       let startPos = randomInt(this.c + 2, numOfSquares - this.c - 2);
       let generatingWall = true;
-      let possMoves = [
-        -this.c,
-        -1,
-        +1,
-        this.c,
-        this.c + 1,
-        -this.c + 1,
-        -this.c - 1,
-        this.c - 1,
-      ];
+
       for (let i = 0; i < length; i++) {
         if (generatingWall) {
-          let moveNum = randomInt(0, 3);
+          const moveNum = randomInt(0, 3);
           startPos += possMoves[moveNum];
           let empty = true;
           try {
@@ -374,7 +374,7 @@ class Player {
   }
 
   shoot() {
-    var BulletObj = new Bullet(
+    const BulletObj = new Bullet(
       this.direction,
       this.divIndex,
       this.GridObj.c,
@@ -484,10 +484,10 @@ function checkFinish(PlayerObj) {
   }
 }
 
-let squareObjs = [];
+const squareObjs = [];
 let coinObjs = [];
 let enemiesObjs = [];
-var GridObj = new Grid();
+const GridObj = new Grid();
 GridObj.setup();
 GridObj.create(squareObjs);
 
@@ -497,8 +497,8 @@ PlayerObj.findSquare(squareObjs);
 enemiesObjs = addInteractiveSquares(GridObj, squareObjs, enemiesObjs, Enemy);
 coinObjs = addInteractiveSquares(GridObj, squareObjs, coinObjs, Coin);
 
-let totalCoins = coinObjs.length;
-let totalEnemies = enemiesObjs.length;
+const totalCoins = coinObjs.length;
+const totalEnemies = enemiesObjs.length;
 
 const CoinText = new UIText(
   document.getElementById("coinCount"),
